@@ -34,7 +34,7 @@ extra
 =====
 
 All arguments except for the storage argument are forwarded to the underlying storage.
-You can use this to pass additional keyword arguments to orjson.dump(…) method.
+You can use this to pass additional keyword arguments to orjson.dumps(…) method.
 
 For all options see the `orjson documentation <https://github.com/ijl/orjson#option>`_.
 

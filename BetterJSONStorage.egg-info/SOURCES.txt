@@ -1,0 +1,9 @@
+LICENSE.txt
+README.rst
+setup.cfg
+setup.py
+BetterJSONStorage.egg-info/PKG-INFO
+BetterJSONStorage.egg-info/SOURCES.txt
+BetterJSONStorage.egg-info/dependency_links.txt
+BetterJSONStorage.egg-info/requires.txt
+BetterJSONStorage.egg-info/top_level.txt
