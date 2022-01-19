@@ -1,0 +1,10 @@
+README.rst
+setup.cfg
+setup.py
+src/BetterJSONStorage.egg-info/PKG-INFO
+src/BetterJSONStorage.egg-info/SOURCES.txt
+src/BetterJSONStorage.egg-info/dependency_links.txt
+src/BetterJSONStorage.egg-info/requires.txt
+src/BetterJSONStorage.egg-info/top_level.txt
+src/betterJSONStorage/BetterJSONStorage.py
+src/betterJSONStorage/__init__.py
