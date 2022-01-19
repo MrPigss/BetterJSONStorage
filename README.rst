@@ -23,8 +23,8 @@ context Manager
     >>> from BetterJSONStorage import BetterJSONStorage
 
     >>> with TinyDB('/path/to/file.db', storage=BetterJSONStorage) as db:
-    >>>     db.insert({'int': 1, 'char': 'a'})
-    >>>     db.insert({'int': 1, 'char': 'b'})
+    >>> db.insert({'int': 1, 'char': 'a'})
+    >>> db.insert({'int': 1, 'char': 'b'})
 
 .. _TinyDB: https://github.com/msiemens/tinydb
 .. _Orjson: https://github.com/ijl/orjson
@@ -39,7 +39,8 @@ You can use this to pass additional keyword arguments to orjson.dump(…) method
 For all options see the `orjson documentation <https://github.com/ijl/orjson#option>`_.
 
 .. code-block:: python
-  with TinyDB('file.db', option=orjson.OPT_STRICT_INTEGER, storage=BetterJSONStorage) as db:
+
+    with TinyDB('file.db', option=orjson.OPT_STRICT_INTEGER, storage=BetterJSONStorage) as db:
 
 performance
 ************
