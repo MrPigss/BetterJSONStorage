@@ -22,13 +22,24 @@ context Manager
     >>> from tinydb import TinyDB
     >>> from BetterJSONStorage import BetterJSONStorage
 
-    >>> with TinyDB('/path/to/db.json', storage=BetterJSONStorage) as db:
+    >>> with TinyDB('/path/to/file.db', storage=BetterJSONStorage) as db:
     >>>     db.insert({'int': 1, 'char': 'a'})
     >>>     db.insert({'int': 1, 'char': 'b'})
 
 .. _TinyDB: https://github.com/msiemens/tinydb
 .. _Orjson: https://github.com/ijl/orjson
 .. _BLOSC: https://github.com/Blosc/python-blosc
+
+extra
+=====
+
+All arguments except for the storage argument are forwarded to the underlying storage.
+You can use this to pass additional keyword arguments to orjson.dump(…) method.
+
+For all options see the `orjson documentation <https://github.com/ijl/orjson#option>`_.
+
+.. code-block:: python
+  with TinyDB('file.db', option=orjson.OPT_STRICT_INTEGER, storage=BetterJSONStorage) as db:
 
 performance
 ************
@@ -41,18 +52,7 @@ The benchmarks are done on fixtures of real data:
 data can be found `here <https://github.com/serde-rs/json-benchmark/tree/master/data>`_.
 
 The exact same code is used for both BetterJSONStorage and the default JSONStorage.
-
 BetterJSONStorage is faster in almost* all situations and uses significantly less space on disk.
-
-.. Hint::
-
-  All arguments except for the storage argument are forwarded to the underlying storage.
-  For the JSON storage you can use this to pass additional keyword arguments to orjson.dump(…) method.
-  For all options see the orjson documentation on `option <https://github.com/ijl/orjson#option>`_.
-
-  .. code-block:: python
-
-    >>> db = TinyDB('db.json', options=orjson.OPT_STRICT_INTEGER | orjson.OPT_NAIVE_UTC, indent=4, separators=(',', ': '))
 
 citm_catalog.json
 ==================
