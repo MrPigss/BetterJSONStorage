@@ -5,7 +5,7 @@ with open("README.rst", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="BetterJSONStorage",
-    version="0.4.1",
+    version="0.4.2",
     author="Thomas Eeckhout",
     author_email="Thomas.Eeckhout@outook.be",
     description="A tinyDB storage extension using a faster json compiler and compression",
