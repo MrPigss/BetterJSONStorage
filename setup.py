@@ -5,7 +5,7 @@ with open("README.rst", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="BetterJSONStorage",
-    version="0.4.2",
+    version="0.4.4",
     author="Thomas Eeckhout",
     author_email="Thomas.Eeckhout@outook.be",
     description="A tinyDB storage extension using a faster json compiler and compression",
@@ -15,7 +15,10 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
+        "Topic :: Database",
     ],
-    install_requires=['orjson','blosc'],
+    package_dir={"": "src"},
+    packages=setuptools.find_packages(where="src"),
+    install_requires=['tinydb', 'orjson','blosc'],
     python_requires=">=3.5",
 )

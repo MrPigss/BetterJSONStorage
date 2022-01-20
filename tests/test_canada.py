@@ -1,4 +1,4 @@
-from betterJSONStorage import BetterJSONStorage
+from BetterJSONStorage import BetterJSONStorage
 from tinydb import TinyDB, Query
 import orjson
 from time import perf_counter

@@ -1,4 +1,4 @@
-.. image:: ./img/logo.png
+.. image:: https://raw.githubusercontent.com/MrPigss/BetterJSONStorage/master/img/logo.png
     :scale: 100%
     :height: 150px
 
