@@ -14,7 +14,11 @@ Anything else can be found in the `TinyDB docs <https://tinydb.readthedocs.io/>`
 
 Installing BetterJSONStorage
 ****************************
+
+Install BetterJSONStorage from `PyPi <https://pypi.org/project/BetterJSONStorage/>`_.
+
 .. code-block:: PowerShell
+
     pip install BetterJSONStorage
 
 Usage
