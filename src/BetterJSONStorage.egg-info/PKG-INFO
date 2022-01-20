@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: BetterJSONStorage
-Version: 0.4.4
+Version: 1.0
 Summary: A tinyDB storage extension using a faster json compiler and compression
 Home-page: https://github.com/MrPigss/BetterJSONStorage
 Author: Thomas Eeckhout
@@ -10,7 +10,7 @@ Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: Operating System :: OS Independent
 Classifier: Topic :: Database
-Requires-Python: >=3.5
+Requires-Python: >=3.6
 Description-Content-Type: text/x-rst
 License-File: LICENSE.txt
 

@@ -12,6 +12,11 @@ and the extra cost of (de-)compressing has been made up for by using the faster 
 An example of how to implement BetterJSONStorage can be found below.
 Anything else can be found in the `TinyDB docs <https://tinydb.readthedocs.io/>`_.
 
+Installing BetterJSONStorage
+****************************
+.. code-block:: PowerShell
+    pip install BetterJSONStorage
+
 Usage
 ************
 

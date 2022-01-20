@@ -13,13 +13,14 @@ def write(db):
     db.table('topics').insert_multiple(topics)
     print(f'\t{perf_counter()-start_write:e}ms writing')
 
-def read(db):
+def read(db: TinyDB):
     start_read = perf_counter()
     topic = Query()
     subtopic = Query()
     table = db.table('topics')
-    table.get(topic.subtopic.any(subtopic.id == '337184267'))
+    x = table.get(topic.subtopic.any(subtopic.id == '337184267'))
     print(f'\t{perf_counter()-start_read:e}ms reading')
+
 
 # load citm.json
 with open('tests/json/citm_catalog.json', 'rb') as f:
@@ -34,6 +35,7 @@ transforms = {
     'topicNames': [{'id':k, 'name':v} for k,v in data['topicNames'].items()],
     'performances': data['performances']
 }
+
 # group topics and subtopics together, no need to be in seperate tables
 topics = []
 for topic in transforms['topicNames']:
