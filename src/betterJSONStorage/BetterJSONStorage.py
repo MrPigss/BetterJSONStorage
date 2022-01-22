@@ -42,6 +42,17 @@ class BetterJSONStorage(Storage):
 class testStorage(Storage):
 
     class AsyncWriter(Thread):
+        """
+        Custom Thread class.
+
+        When called, the thread:
+        1.  opens the file from disk
+        2.  parses the data to json
+        3.  compresses the json
+        4.  writes compressed json to disk
+        5.  exists.
+
+        """
         def __init__(self, filename, data):
             Thread.__init__(self, daemon=True)
             self.filename = filename
@@ -49,7 +60,7 @@ class testStorage(Storage):
 
         def run(self):
             with open(self.filename, 'wb') as f:
-                f.write(compress(self.data))
+                f.write(compress(dumps(self.data)))
 
     def __init__(self, path: str, access_mode='r+', create_dirs=False,**kwargs):
         self._kwargs = kwargs
@@ -60,28 +71,40 @@ class testStorage(Storage):
 
         # only open and decompress the file from storage once.
         # then read and put the data in memory
-        with open(path, mode='rb') as handle:
-            self._handle = BytesIO(decompress(handle.read()))
+        self.load()
 
-    # close the memory buffer
+    # really isn't necesarry
     def close(self):
-        self._handle.close()
+        del self._handle
 
-    # only read from memorybuffer
+    # just read from memory, no need to open the file.
     def read(self):
-        self._handle.seek(0,2) # go to the end of the file
-        if not self._handle.tell(): return None # if tell returns zero file is empty
-        return loads(self._handle.getvalue()) # read from the buffer
+        return self._handle
 
 
     def write(self, data):
-        serialized = dumps(data, **self._kwargs) # serialize data from table
-        self._handle.seek(0) #got to the start of the 'file'
-        self._handle.write(serialized) # write the serialized file
-        self._handle.truncate() # truncate in case the 'file' got smaller
+        """
+        Writes data to file.
 
-        # since everything has been done in memory it's not on disk yet
-        # compress and write to disk in a seperate daemon thread
-        # so we don't block the current one
-        self.AsyncWriter(self._path, serialized).start()
+        First data is saved in memory for faster acces.
+        For parsing json, compressing, and writing the file to disk a new thread is spawned
+        so the current thread is not blocked.
+        """
+        self._handle = data
+        self.AsyncWriter(fileanem=self._path, data=self._handle).start()
+
+    def load(self):
+        """
+        Sets the data in memory to the contents of the file.
+        This is done on object creation.
+
+        Can be done manually to ensure data is synchronised. (shouldn not be necesarry)
+        """
+        with open(self._path, mode='rb') as handle:
+            # check if file is empty
+            handle.seek(0,2)
+            if not handle.tell(): return None
+            # if not empty, read it
+            handle.seek(0)
+            self._handle = loads(decompress(handle.read()))
 

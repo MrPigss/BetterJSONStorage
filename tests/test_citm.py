@@ -1,26 +1,24 @@
-from tinydb.database import TableBase
-from BetterJSONStorage import BetterJSONStorage
+from BetterJSONStorage import BetterJSONStorage, testStorage
 from tinydb import TinyDB, Query
 import orjson
-from time import perf_counter
+from time import perf_counter_ns
 
-def write(db):
-    start_write = perf_counter()
+def write(db: TinyDB):
+    start_write = perf_counter_ns()
     db.drop_tables()
     for table in data:
         if table not in ('topicNames', 'subTopicNames', 'topicSubTopics'):
             db.table(table).insert_multiple(transforms[table])
     db.table('topics').insert_multiple(topics)
-    print(f'\t{perf_counter()-start_write:e}ms writing')
+    print(f'\t{perf_counter_ns()-start_write}ns writing')
 
 def read(db: TinyDB):
-    start_read = perf_counter()
+    start_read = perf_counter_ns()
     topic = Query()
     subtopic = Query()
     table = db.table('topics')
     x = table.get(topic.subtopic.any(subtopic.id == '337184267'))
-    print(f'\t{perf_counter()-start_read:e}ms reading')
-
+    print(f'\t{perf_counter_ns()-start_read}ns reading')
 
 # load citm.json
 with open('tests/json/citm_catalog.json', 'rb') as f:
@@ -45,28 +43,28 @@ for topic in transforms['topicNames']:
         'subtopic':[subtopic for subtopic in transforms['subTopicNames'] if int(subtopic['id']) in data['topicSubTopics'][topic['id']]]
     })
 
-
-
+print('threadedJSONStorage:')
+start = perf_counter_ns()
+with TinyDB('tests/db/test_citm2.db', storage=testStorage) as db:
+    write(db)
+    read(db)
+end_threaded = perf_counter_ns()-start
 
 # test with BetterJSONStorage
 print('BetterJSONStorage:')
-start = perf_counter()
+start = perf_counter_ns()
 with TinyDB('tests/db/test_citm.db', storage=BetterJSONStorage) as db:
     write(db)
     read(db)
-end_better = perf_counter()-start
+end_better = perf_counter_ns()-start
 
-
-# test with default JSONStorage
 print('default JSONStorage:')
-start = perf_counter()
-with TinyDB('tests/db/test_citm2.db') as db:
+start = perf_counter_ns()
+with TinyDB('tests/db/test_citm3.db') as db:
     write(db)
     read(db)
-end_default = perf_counter()-start
+end_default = perf_counter_ns()-start
 
+print(f"Total:\n\tThreadedJsonStorage: {end_threaded/1000000}ms\n\tBetterJsonStorage: {end_better/1000000}ms\n\tdefault jsonStorage: {end_default/1000000}ms\ndifference:\n\ttjs: {end_threaded/end_threaded:.2}x\n\tbjs: {end_better/end_threaded:.2}x\n\tdjs: {end_default/end_threaded:.3}x")
 
-print(f"Total:\n\tBetterJsonStorage: {end_better:e}ms\n\tdefault jsonStorage: {end_default:e}ms\n\tdifference: {end_default/end_better:.3}x")
-
-
-
+end_threaded
