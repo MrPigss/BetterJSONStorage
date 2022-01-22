@@ -1,6 +1,4 @@
-import os
 from pathlib import Path
-from statistics import mode
 from threading import Thread
 from typing import Mapping
 
@@ -9,44 +7,7 @@ from orjson import dumps, loads
 from tinydb import Storage
 
 
-def touch(path: str, create_dirs):
-    base_dir = os.path.dirname(path)
-    if create_dirs:
-        base_dir = os.path.dirname(path)
-        if not os.path.exists(base_dir):
-            os.makedirs(base_dir)
-    with open(path, "a"):
-        ...
-
-
 class BetterJSONStorage(Storage):
-    def __init__(self, path: str, access_mode="r+", create_dirs=False, **kwargs):
-        super().__init__()
-        self._kwargs = kwargs
-
-        if any([character in access_mode for character in ("+", "w", "a")]):
-            touch(path, create_dirs)
-        self._handle = open(path, mode=access_mode + "b")
-
-    def close(self):
-        self._handle.close()
-
-    def read(self) -> Mapping:
-        self._handle.seek(0, os.SEEK_END)
-        if not self._handle.tell():
-            return None
-        self._handle.seek(0)
-        return loads(decompress(self._handle.read()))
-
-    def write(self, data):
-        self._handle.seek(0)
-        self._handle.write(compress(dumps(data, **self._kwargs)))
-        self._handle.flush()
-        os.fsync(self._handle.fileno())
-        self._handle.truncate()
-
-
-class AsyncStorage(Storage):
     """
     A class that represents a storage interface for reading and writing to a file.
 
@@ -90,25 +51,9 @@ class AsyncStorage(Storage):
             self.data = data
 
         def run(self):
-            self.path.write_bytes(compress(dumps(self.data)))
+            self.path.write_bytes(compress(dumps(self.data, **self.kwargs)))
 
     def __init__(self, path: str, access_mode: str = "r", **kwargs):
-        """
-        Attributes
-        ----------
-        `path: str`
-            Path to file, if it does not exist it will be created only if the the 'r+' access mode is set.
-
-        `access_mode: str, optional`
-            Options are `'r'` for readonly (default), or `'r+'` for writing and reading.
-
-        `kwargs:`
-            These attributes will be passed on to `orjson.dumps`
-
-        Raises
-        ------
-        `FileNotFoundError` when the file doens't exist and `r+` is not set
-        """
         self._kwargs = kwargs
         self._path = Path(path)
         self._acces_mode = access_mode
@@ -130,11 +75,5 @@ class AsyncStorage(Storage):
         self._AsyncWriter(path=self._path, data=self._handle).start()
 
     def load(self) -> None:
-        with open(self._path, mode="rb") as handle:
-            # check if file is empty
-            handle.seek(0, 2)
-            if not handle.tell():
-                return None
-            # if not empty, read it
-            handle.seek(0)
-            self._handle = loads(decompress(handle.read()))
+        if len(db_bytes := self._path.read_bytes()):
+            self._handle = loads(decompress(db_bytes))

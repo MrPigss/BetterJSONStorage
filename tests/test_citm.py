@@ -1,7 +1,7 @@
 from time import perf_counter_ns
 
 import orjson
-from BetterJSONStorage import BetterJSONStorage, AsyncStorage
+from BetterJSONStorage import BetterJSONStorage
 from tinydb import Query, TinyDB
 
 
@@ -67,16 +67,10 @@ for topic in transforms["topicNames"]:
     )
 
 start = perf_counter_ns()
-with TinyDB("tests/db/test_citm2.db", access_mode='r+', storage=AsyncStorage) as db:
+with TinyDB("tests/db/test_citm.db", access_mode='r+', storage=BetterJSONStorage) as db:
     write(db)
     read(db)
 end_threaded = perf_counter_ns() - start
-
-start = perf_counter_ns()
-with TinyDB("tests/db/test_citm.db", storage=BetterJSONStorage) as db:
-    write(db)
-    read(db)
-end_better = perf_counter_ns() - start
 
 start = perf_counter_ns()
 with TinyDB("tests/db/test_citm3.db") as db:
@@ -85,5 +79,5 @@ with TinyDB("tests/db/test_citm3.db") as db:
 end_default = perf_counter_ns() - start
 
 print(
-    f"Total: \n\tThreadedJsonStorage: {end_threaded/1000000}ms\n\tBetterJsonStorage: {end_better/1000000}ms\n\tdefault jsonStorage: {end_default/1000000}ms\ndifference: \n\ttjs: {end_threaded/end_threaded:.2}x\n\tbjs: {end_better/end_threaded:.2}x\n\tdjs: {end_default/end_threaded:.3}x"
+    f"Total: \n\tBetterJsonStorage: {end_threaded/1000000}ms\n\tdefault jsonStorage: {end_default/1000000}ms\ndifference: \n\tbjs: {end_threaded/end_threaded:.2}x\n\tdjs: {end_default/end_threaded:.3}x"
 )

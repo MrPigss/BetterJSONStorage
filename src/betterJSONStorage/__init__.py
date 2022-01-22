@@ -1,3 +1,3 @@
-from .BetterJSONStorage import BetterJSONStorage, AsyncStorage
+from .BetterJSONStorage import BetterJSONStorage
 
-__all__ = ['BetterJSONStorage', 'AsyncStorage']
+__all__ = ['BetterJSONStorage']
