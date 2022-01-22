@@ -1,33 +1,40 @@
-from io import BytesIO
-from threading import Thread
-from orjson import loads, dumps
-from blosc import compress, decompress
-from tinydb import Storage
 import os
+from pathlib import Path
+from statistics import mode
+from threading import Thread
+from typing import Mapping
+
+from blosc import compress, decompress
+from orjson import dumps, loads
+from tinydb import Storage
+
 
 def touch(path: str, create_dirs):
     base_dir = os.path.dirname(path)
     if create_dirs:
         base_dir = os.path.dirname(path)
-        if not os.path.exists(base_dir): os.makedirs(base_dir)
-    with open(path, 'a'): ...
+        if not os.path.exists(base_dir):
+            os.makedirs(base_dir)
+    with open(path, "a"):
+        ...
+
 
 class BetterJSONStorage(Storage):
-
-    def __init__(self, path: str, access_mode='r+', create_dirs=False,**kwargs):
+    def __init__(self, path: str, access_mode="r+", create_dirs=False, **kwargs):
         super().__init__()
         self._kwargs = kwargs
 
-        if any([character in access_mode for character in ('+', 'w', 'a')]):
+        if any([character in access_mode for character in ("+", "w", "a")]):
             touch(path, create_dirs)
-        self._handle = open(path, mode=access_mode+'b')
+        self._handle = open(path, mode=access_mode + "b")
 
     def close(self):
         self._handle.close()
 
-    def read(self):
+    def read(self) -> Mapping:
         self._handle.seek(0, os.SEEK_END)
-        if not self._handle.tell(): return None
+        if not self._handle.tell():
+            return None
         self._handle.seek(0)
         return loads(decompress(self._handle.read()))
 
@@ -39,72 +46,95 @@ class BetterJSONStorage(Storage):
         self._handle.truncate()
 
 
-class testStorage(Storage):
+class AsyncStorage(Storage):
+    """
+    A class that represents a storage interface for reading and writing to a file.
 
-    class AsyncWriter(Thread):
-        """
-        Custom Thread class.
 
-        When called, the thread:
-        1.  opens the file from disk
-        2.  parses the data to json
-        3.  compresses the json
-        4.  writes compressed json to disk
-        5.  exists.
+    Attributes
+    ----------
+    `path: str`
+        Path to file, if it does not exist it will be created only if the the 'r+' access mode is set.
 
-        """
-        def __init__(self, filename, data):
-            Thread.__init__(self, daemon=True)
-            self.filename = filename
+    `access_mode: str, optional`
+        Options are `'r'` for readonly (default), or `'r+'` for writing and reading.
+
+    `kwargs:`
+        These attributes will be passed on to `orjson.dumps`
+
+    Methods
+    -------
+    `read() -> Mapping:`
+        Returns the data from memory.
+
+    `write(data: Mapping) -> None:`
+        Writes data to file if acces mode is set to `r+`.
+
+    `load() -> None:`
+        loads the data from disk. This happens on object creation.
+        Can be used when you suspect the data in memory and on disk are not in sync anymore.
+
+    Raises
+    ------
+    `FileNotFoundError` when the file doesn't exist and `r+` is not set
+
+    Notes
+    ----
+    If the directory specified in `path` does not exist it will only be created if access_mode is set to `'r+'`.
+    """
+
+    class _AsyncWriter(Thread):
+        def __init__(self, path: Path, data: Mapping):
+            Thread.__init__(self)
+            self.path = path
             self.data = data
 
         def run(self):
-            with open(self.filename, 'wb') as f:
-                f.write(compress(dumps(self.data)))
+            self.path.write_bytes(compress(dumps(self.data)))
 
-    def __init__(self, path: str, access_mode='r+', create_dirs=False,**kwargs):
+    def __init__(self, path: str, access_mode: str = "r", **kwargs):
+        """
+        Attributes
+        ----------
+        `path: str`
+            Path to file, if it does not exist it will be created only if the the 'r+' access mode is set.
+
+        `access_mode: str, optional`
+            Options are `'r'` for readonly (default), or `'r+'` for writing and reading.
+
+        `kwargs:`
+            These attributes will be passed on to `orjson.dumps`
+
+        Raises
+        ------
+        `FileNotFoundError` when the file doens't exist and `r+` is not set
+        """
         self._kwargs = kwargs
-        self._path = path
+        self._path = Path(path)
+        self._acces_mode = access_mode
 
-        if any([character in access_mode for character in ('+', 'w', 'a')]):
-            touch(path, create_dirs)
+        if access_mode == "r+":
+            self._path.parent.mkdir(parents=True, exist_ok=True)
+            self._path.touch()
 
-        # only open and decompress the file from storage once.
-        # then read and put the data in memory
         self.load()
 
-    # really isn't necesarry
-    def close(self):
-        del self._handle
-
-    # just read from memory, no need to open the file.
-    def read(self):
+    def read(self) -> Mapping:
         return self._handle
 
+    def write(self, data: Mapping) -> None:
+        if not self._acces_mode == "r+":
+            raise PermissionError("Storage is openend as read only")
 
-    def write(self, data):
-        """
-        Writes data to file.
-
-        First data is saved in memory for faster acces.
-        For parsing json, compressing, and writing the file to disk a new thread is spawned
-        so the current thread is not blocked.
-        """
         self._handle = data
-        self.AsyncWriter(fileanem=self._path, data=self._handle).start()
+        self._AsyncWriter(path=self._path, data=self._handle).start()
 
-    def load(self):
-        """
-        Sets the data in memory to the contents of the file.
-        This is done on object creation.
-
-        Can be done manually to ensure data is synchronised. (shouldn not be necesarry)
-        """
-        with open(self._path, mode='rb') as handle:
+    def load(self) -> None:
+        with open(self._path, mode="rb") as handle:
             # check if file is empty
-            handle.seek(0,2)
-            if not handle.tell(): return None
+            handle.seek(0, 2)
+            if not handle.tell():
+                return None
             # if not empty, read it
             handle.seek(0)
             self._handle = loads(decompress(handle.read()))
-

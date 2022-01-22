@@ -29,7 +29,7 @@ reading is all done in memory.
 
 These optimizations result in much faster reading and writing wihtout loss of functionality.
 
-A goal for the BetterJSONStorage project is to provide a drop in replacement for the default JSONStorage. Any deviation from the behavior of the reference JSONStorage is considered a bug.
+A goal for the BetterJSONStorage project is to provide a drop in replacement for the default JSONStorage.
 
 An example of how to implement BetterJSONStorage can be found below.
 Anything else can be found in the `TinyDB docs <https://tinydb.readthedocs.io/>`_.
