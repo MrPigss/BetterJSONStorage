@@ -34,10 +34,13 @@ context Manager
 ===============
 .. code-block:: python
 
+    from pathlib import Path
     from tinydb import TinyDB
     from BetterJSONStorage import BetterJSONStorage
 
-    with TinyDB('/path/to/file.db', storage=BetterJSONStorage) as db:
+    path = Path('relative/path/to/file.db')
+
+    with TinyDB(path, storage=BetterJSONStorage) as db:
         db.insert({'int': 1, 'char': 'a'})
         db.insert({'int': 1, 'char': 'b'})
 
@@ -61,6 +64,8 @@ performance
 ************
 The benchmarks are done on fixtures of real data:
 
+For now only storage numbers are available but preliminary testing shows around 10x faster reads and writes.
+
 * citm_catalog.json, 1.7MiB, concert data, containing nested dictionaries of strings and arrays of integers, indented.
 * canada.json, 2.2MiB, coordinates of the Canadian border in GeoJSON format, containing floats and arrays, indented.
 * twitter.json, 631.5KiB, results of a search on Twitter for "一", containing CJK strings, dictionaries of strings and arrays of dictionaries, indented.
@@ -72,34 +77,6 @@ BetterJSONStorage is faster in almost* all situations and uses significantly les
 
 citm_catalog.json
 ==================
-
-.. list-table:: write_speed
-   :widths: 25 25 25
-   :header-rows: 1
-
-   * - storage
-     - time im ms
-     - vs. BetterJSONStorage
-   * - BetterJSONStorage
-     - 0.1182915
-     - 1x
-   * - default JSONStorage
-     - 0.193683
-     - 1.64x
-
-.. list-table:: read_speed
-   :widths: 25 25 25
-   :header-rows: 1
-
-   * - storage
-     - time im ms
-     - vs. BetterJSONStorage
-   * - BetterJSONStorage
-     - 0.0098675
-     - 1x
-   * - default JSONStorage
-     - 0.0099165
-     - 1x
 
 .. list-table:: storage used
    :widths: 25 25 25
@@ -118,34 +95,6 @@ citm_catalog.json
 canada.json
 ==================
 
-.. list-table:: write_speed
-   :widths: 25 25 25
-   :header-rows: 1
-
-   * - storage
-     - time im ms
-     - vs. BetterJSONStorage
-   * - BetterJSONStorage
-     - 0.0316401
-     - 1x
-   * - default JSONStorage
-     - 0.0939051
-     - 2.97x
-
-.. list-table:: read_speed
-   :widths: 25 25 25
-   :header-rows: 1
-
-   * - storage
-     - time im ms
-     - vs. BetterJSONStorage
-   * - BetterJSONStorage
-     - 0.0276127
-     - 1x
-   * - default JSONStorage
-     - 0.057871
-     - 2.1x
-
 .. list-table:: storage used
    :widths: 25 25 25
    :header-rows: 1
@@ -162,34 +111,6 @@ canada.json
 
 twitter.json
 ==================
-
-.. list-table:: write_speed
-   :widths: 25 25 25
-   :header-rows: 1
-
-   * - storage
-     - time im ms
-     - vs. BetterJSONStorage
-   * - BetterJSONStorage
-     - 0.0104866
-     - 1x
-   * - default JSONStorage
-     - 0.0145437
-     - 1.39x
-
-.. list-table:: read_speed
-   :widths: 25 25 25
-   :header-rows: 1
-
-   * - storage
-     - time im ms
-     - vs. BetterJSONStorage
-   * - BetterJSONStorage
-     - 0.0069805
-     - 1x
-   * - default JSONStorage
-     - 0.0078986
-     - 1.13x
 
 .. list-table:: storage used
    :widths: 25 25 25
