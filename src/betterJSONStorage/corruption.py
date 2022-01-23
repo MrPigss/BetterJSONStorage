@@ -1,35 +1,13 @@
 from pathlib import Path
-from time import perf_counter_ns
-
+from threading import Thread
 import orjson
-from BetterJSONStorage import BetterJSONStorage
 from tinydb import Query, TinyDB
+from BetterJSONStorage import BetterJSONStorage
+Thread
+p = Path('pytest/empty.db')
 
-
-def write(db: TinyDB):
-    start_write = perf_counter_ns()
-    db.drop_tables()
-    for table in data:
-        if table not in ("topicNames", "subTopicNames", "topicSubTopics"):
-            db.table(table).insert_multiple(transforms[table])
-    db.table("topics").insert_multiple(topics)
-    print(f'\t{perf_counter_ns()-start_write}ns writing')
-
-
-def read(db: TinyDB):
-    start_read = perf_counter_ns()
-    topic = Query()
-    subtopic = Query()
-    table = db.table("topics")
-    table.get(topic.subtopic.any(subtopic.id == "337184267")) != None
-    print(f'\t{perf_counter_ns()-start_read}ns reading')
-
-
-# load citm.json
 with open("tests/json/citm_catalog.json", "rb") as f:
     data = orjson.loads(f.read())
-
-# transform the data so it fits the 'document store' model better (no data has been deleted, only transformed)
 transforms = {
     "events": [item for item in data["events"].values()],
     "seatCategoryNames": [
@@ -67,18 +45,25 @@ for topic in transforms["topicNames"]:
         }
     )
 
-start = perf_counter_ns()
-with TinyDB(Path("tests/db/test_citm.db"), access_mode='r+', storage=BetterJSONStorage) as db:
-    write(db)
-    read(db)
-end_threaded = perf_counter_ns() - start
+with TinyDB(p, access_mode='r+', storage=BetterJSONStorage) as db :
+    db.drop_tables()
+    for table in data:
+        if table not in ("topicNames", "subTopicNames", "topicSubTopics"):
+            db.table(table).insert_multiple(transforms[table])
+            db.table(table).remove(doc_ids=[1])
+            db.table(table).insert({})
+            db.table(table).insert_multiple(transforms[table])
+            db.table(table).remove(doc_ids=[2])
+            db.table(table).insert({})
+            db.table(table).insert({})
+            db.table(table).insert({})
+            db.table(table).insert({})
+    print(db)
 
-start = perf_counter_ns()
-with TinyDB("tests/db/test_citm2.db") as db:
-    write(db)
-    read(db)
-end_default = perf_counter_ns() - start
 
-print(
-    f"Total: \n\tBetterJsonStorage: {end_threaded/1000000}ms\n\tdefault jsonStorage: {end_default/1000000}ms\ndifference: \n\tbjs: {end_threaded/end_threaded:.2}x\n\tdjs: {end_default/end_threaded:.3}x"
-)
+with TinyDB(p, access_mode='r', storage=BetterJSONStorage) as db :
+    for table in data:
+        print([x for x in db.table(table).all() if x == {}])
+        print(db.table(table).get(doc_id=1))
+        print(db.table(table).get(doc_id=2))
+        print(db.table(table).get(doc_id=3))
