@@ -1,3 +1,4 @@
+from pathlib import Path
 from time import perf_counter_ns
 
 import orjson
@@ -6,22 +7,22 @@ from tinydb import Query, TinyDB
 
 
 def write(db: TinyDB):
-    # start_write = perf_counter_ns()
+    start_write = perf_counter_ns()
     db.drop_tables()
     for table in data:
         if table not in ("topicNames", "subTopicNames", "topicSubTopics"):
             db.table(table).insert_multiple(transforms[table])
     db.table("topics").insert_multiple(topics)
-    # print(f'\t{perf_counter_ns()-start_write}ns writing')
+    print(f'\t{perf_counter_ns()-start_write}ns writing')
 
 
 def read(db: TinyDB):
-    # start_read = perf_counter_ns()
+    start_read = perf_counter_ns()
     topic = Query()
     subtopic = Query()
     table = db.table("topics")
-    table.get(topic.subtopic.any(subtopic.id == "337184267"))
-    # print(f'\t{perf_counter_ns()-start_read}ns reading')
+    table.get(topic.subtopic.any(subtopic.id == "337184267")) != None
+    print(f'\t{perf_counter_ns()-start_read}ns reading')
 
 
 # load citm.json
@@ -67,13 +68,13 @@ for topic in transforms["topicNames"]:
     )
 
 start = perf_counter_ns()
-with TinyDB("tests/db/test_citm.db", access_mode='r+', storage=BetterJSONStorage) as db:
+with TinyDB(Path("tests/db/test_citm.db"), access_mode='r+', storage=BetterJSONStorage) as db:
     write(db)
     read(db)
 end_threaded = perf_counter_ns() - start
 
 start = perf_counter_ns()
-with TinyDB("tests/db/test_citm3.db") as db:
+with TinyDB("tests/db/test_citm2.db") as db:
     write(db)
     read(db)
 end_default = perf_counter_ns() - start
