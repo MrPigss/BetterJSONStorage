@@ -127,11 +127,9 @@ class Test_writes:
 
     def test_continuety_between_instances(self, db_file):
         test_dict = {"Test": "test"}
-        storage_one = BetterJSONStorage(db_file, access_mode="r+")
-        storage_one.write(test_dict)
-        assert storage_one.read() == test_dict
-        sleep(0.1)
+        with TinyDB(db_file, access_mode="r+", storage=BetterJSONStorage) as db:
+            x = db.insert(test_dict)
 
-        del storage_one
-        storage_two = BetterJSONStorage(db_file)
-        assert storage_two.read() == test_dict
+
+        with TinyDB(db_file, access_mode="r+", storage=BetterJSONStorage) as db:
+            assert db.get(doc_id=x) == test_dict

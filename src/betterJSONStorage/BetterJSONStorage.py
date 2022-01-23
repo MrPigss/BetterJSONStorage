@@ -1,3 +1,4 @@
+# from threading import Thread
 import _thread as Thread
 from pathlib import Path
 from typing import Mapping
@@ -9,11 +10,14 @@ from tinydb import Storage
 
 class Singleton(object):
     _paths = []
+
     def __new__(class_, path, *args, **kwargs):
         h = hash(path)
         paths = class_._paths
         if h in paths:
-            raise AttributeError(f'A BetterJSONStorage object already exists with path < "{path}" >')
+            raise AttributeError(
+                f'A BetterJSONStorage object already exists with path < "{path}" >'
+            )
         class_._paths.append(h)
         return object.__new__(class_)
 
@@ -54,6 +58,7 @@ class BetterJSONStorage(Storage, Singleton):
     ----
     If the directory specified in `path` does not exist it will only be created if access_mode is set to `'r+'`.
     """
+
     def __del__(self):
         if (h := hash(self._path)) in (p := self.__class__._paths):
             p.remove(h)
@@ -62,7 +67,6 @@ class BetterJSONStorage(Storage, Singleton):
         self._kwargs = kwargs
         self._path = path
         self._acces_mode = access_mode
-        self._write_lock = Thread.allocate_lock()
 
         if not access_mode in ("r", "r+"):
             raise AttributeError(
@@ -86,23 +90,23 @@ class BetterJSONStorage(Storage, Singleton):
         )
 
     def __repr__(self):
-        return f"""BetterJSONStorage(path={self._path}, Paths={self.__class__._paths})"""
+        return (
+            f"""BetterJSONStorage(path={self._path}, Paths={self.__class__._paths})"""
+        )
 
     def read(self) -> Mapping:
         return self._handle
 
     def _write_async(self):
         if self._handle:
-            self._write_lock.acquire()
             with open(self._path, mode="wb") as f:
                 f.write(compress(dumps(self._handle, **self._kwargs)))
-            self._write_lock.release()
 
     def write(self, data: Mapping) -> None:
         if not self._acces_mode == "r+":
             raise PermissionError("Storage is openend as read only")
-
         self._handle = data
+        # Thread(target=self._write_async, args=()).start()
         Thread.start_new_thread(self._write_async, ())
 
     def load(self) -> None:
@@ -112,4 +116,5 @@ class BetterJSONStorage(Storage, Singleton):
             self._handle = None
 
     def close(self):
-        self.__class__._paths.remove(hash(self._path))
+        if (h := hash(self._path)) in (p := self.__class__._paths):
+            p.remove(h)
