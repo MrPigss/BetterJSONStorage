@@ -7,11 +7,11 @@ Introduction
 BetterJSONStorage is a faster 'Storage Type' for TinyDB_.
 It uses the faster Orjson_ library for parsing the JSON and BLOSC_ for compression.
 
-Parsing, compressing, and writing to the file is done by a seperate thread wich makes writing a lot faster.
+Parsing, compressing, and writing to the file is done by a seperate thread so reads don't get blocked by slow fileIO.
 Smaller filesizes result in faster reading and writing (less diskIO).
-reading is all done in memory.
+Even Reading is all done from memory.
 
-These optimizations result in much faster reading and writing wihtout loss of functionality.
+These optimizations result in much faster reading and writing without loss of functionality.
 
 A goal for the BetterJSONStorage project is to provide a drop in replacement for the default JSONStorage.
 
@@ -50,8 +50,10 @@ context Manager
 
 extra
 =====
+one difference from TinyDB default JSONStorage is that BetterJSONStorage is ReadOnly by default. 
+use acces_mode='r+' if you want to write as well. 
 
-All arguments except for the storage argument are forwarded to the underlying storage.
+All arguments except for the storage and acces_mode argument are forwarded to the underlying storage.
 You can use this to pass additional keyword arguments to orjson.dumps(…) method.
 
 For all options see the `orjson documentation <https://github.com/ijl/orjson#option>`_.
