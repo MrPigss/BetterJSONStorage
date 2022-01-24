@@ -1,12 +1,7 @@
-from ast import Store
 import os
 import tempfile
 from pathlib import Path
 from time import sleep
-from typing import Dict
-from webbrowser import get
-
-import orjson
 from BetterJSONStorage import BetterJSONStorage
 from tinydb import TinyDB
 
@@ -78,7 +73,7 @@ class Test_path:
 
 class Test_multiple_instances:
     def test_different_paths(self, db_file):
-        p = Path(str(db_file)+'test.db')
+        p = Path(str(db_file) + "test.db")
         x = BetterJSONStorage(db_file, access_mode="r+")
         y = BetterJSONStorage(p, access_mode="r+")
 
@@ -98,10 +93,17 @@ class Test_reads:
         db.close()
 
     def test_reading(self):
-        doc = {'id': '107888604', 'name': 'Activité', 'subtopic': [{'id': '337184267', 'name': 'Ciné-concert'}, {'id': '337184283', 'name': 'Concert'}]}
+        doc = {
+            "id": "107888604",
+            "name": "Activité",
+            "subtopic": [
+                {"id": "337184267", "name": "Ciné-concert"},
+                {"id": "337184283", "name": "Concert"},
+            ],
+        }
         p = Path("test_citm.db")
         with TinyDB(p, storage=BetterJSONStorage) as db:
-            assert db.table('topics').get(doc_id=1) == doc
+            assert db.table("topics").get(doc_id=1) == doc
 
 
 class Test_writes:
@@ -124,12 +126,10 @@ class Test_writes:
             x = BetterJSONStorage(db_file, access_mode="r+")
             y = BetterJSONStorage(db_file)
 
-
     def test_continuety_between_instances(self, db_file):
         test_dict = {"Test": "test"}
         with TinyDB(db_file, access_mode="r+", storage=BetterJSONStorage) as db:
             x = db.insert(test_dict)
-
 
         with TinyDB(db_file, access_mode="r+", storage=BetterJSONStorage) as db:
             assert db.get(doc_id=x) == test_dict
