@@ -63,17 +63,21 @@ class BetterJSONStorage(Storage, Singleton):
             p.remove(h)
 
     def __init__(self, path: Path = Path(), access_mode: str = "r", **kwargs):
+        self._path = path
 
         if not isinstance(path, Path):
+            self.close()
             raise TypeError("path is not an instance of pathlib.Path")
 
         if not access_mode in ("r", "r+"):
+            self.close()
             raise AttributeError(
                 f'access_mode is not one of ("r", "r+"), :{access_mode}'
             )
 
         if not path.exists():
             if access_mode == "r":
+                self.close()
                 raise FileNotFoundError(
                     f"""File can't be found, use access_mode='r+' if you wan to create it.
                         Path: <{path.absolute()}>,
@@ -85,23 +89,14 @@ class BetterJSONStorage(Storage, Singleton):
             path.touch()
 
         if not path.is_file():
+            self.close()
             raise FileNotFoundError(
                 f"""path does not lead to a file: <{path.absolute()}>."""
             )
 
-
-        self._path = path
         self._acces_mode = access_mode
         self._kwargs = kwargs
         self.load()
-
-        # raise FileNotFoundError(
-        #     f"""File can't be created because readOnly is set or path is an existing directory.
-        #     Path: <{path.absolute()}>,
-        #     Mode: <{"readOnly" if access_mode == "r" else "readWrite"}>,
-        #     Is_directory: <{path.is_dir()}>
-        # """
-        # )
 
     def __repr__(self):
         return (

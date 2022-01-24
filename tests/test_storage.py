@@ -118,7 +118,7 @@ class Test_reads:
                 {"id": "337184283", "name": "Concert"},
             ],
         }
-        p = Path("test_citm.db")
+        p = Path("tests/test_citm.db")
         with TinyDB(p, storage=BetterJSONStorage) as db:
             assert db.table("topics").get(doc_id=1) == doc
 
@@ -137,6 +137,7 @@ class Test_writes:
             db.remove(doc_ids=[insert])
             assert db.get(doc_id=insert) == None
             sleep(0.1)
+
 
     def test_writing_different_instances(self, db_file):
         with pytest.raises(AttributeError):
