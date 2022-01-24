@@ -1,4 +1,3 @@
-# from threading import Thread
 import _thread as Thread
 from pathlib import Path
 from typing import Mapping
@@ -64,30 +63,45 @@ class BetterJSONStorage(Storage, Singleton):
             p.remove(h)
 
     def __init__(self, path: Path = Path(), access_mode: str = "r", **kwargs):
-        self._kwargs = kwargs
-        self._path = path
-        self._acces_mode = access_mode
+
+        if not isinstance(path, Path):
+            raise TypeError("path is not an instance of pathlib.Path")
 
         if not access_mode in ("r", "r+"):
             raise AttributeError(
                 f'access_mode is not one of ("r", "r+"), :{access_mode}'
             )
 
-        if access_mode == "r+":
-            self._path.parent.mkdir(parents=True, exist_ok=True)
-            self._path.touch()
+        if not path.exists():
+            if access_mode == "r":
+                raise FileNotFoundError(
+                    f"""File can't be found, use access_mode='r+' if you wan to create it.
+                        Path: <{path.absolute()}>,
+                        Mode: <{"readOnly" if access_mode == "r" else "readWrite"}>,
+                        """
+                )
 
-        if path.is_file():
-            self.load()
-            return
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.touch()
 
-        raise FileNotFoundError(
-            f"""File can't be created because readOnly is set or path is an existing directory.
-            Path: <{path.absolute()}>,
-            Mode: <{"readOnly" if access_mode == "r" else "readWrite"}>,
-            Is_directory: <{path.is_dir()}>
-        """
-        )
+        if not path.is_file():
+            raise FileNotFoundError(
+                f"""path does not lead to a file: <{path.absolute()}>."""
+            )
+
+
+        self._path = path
+        self._acces_mode = access_mode
+        self._kwargs = kwargs
+        self.load()
+
+        # raise FileNotFoundError(
+        #     f"""File can't be created because readOnly is set or path is an existing directory.
+        #     Path: <{path.absolute()}>,
+        #     Mode: <{"readOnly" if access_mode == "r" else "readWrite"}>,
+        #     Is_directory: <{path.is_dir()}>
+        # """
+        # )
 
     def __repr__(self):
         return (
@@ -106,7 +120,6 @@ class BetterJSONStorage(Storage, Singleton):
         if not self._acces_mode == "r+":
             raise PermissionError("Storage is openend as read only")
         self._handle = data
-        # Thread(target=self._write_async, args=()).start()
         Thread.start_new_thread(self._write_async, ())
 
     def load(self) -> None:

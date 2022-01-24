@@ -4,7 +4,6 @@ setup.cfg
 setup.py
 src/BetterJSONStorage/BetterJSONStorage.py
 src/BetterJSONStorage/__init__.py
-src/BetterJSONStorage/corruption.py
 src/BetterJSONStorage.egg-info/PKG-INFO
 src/BetterJSONStorage.egg-info/SOURCES.txt
 src/BetterJSONStorage.egg-info/dependency_links.txt

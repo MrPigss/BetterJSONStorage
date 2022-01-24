@@ -29,21 +29,25 @@ def empty_db_file() -> None:
 # Tests
 #
 #
-class Test_args:
-    def test_acces_mode(self, db_file):
-        BetterJSONStorage(db_file, access_mode="r+")
-        BetterJSONStorage(db_file, access_mode="r")
-        BetterJSONStorage(db_file)
-        with pytest.raises(AttributeError):
-            BetterJSONStorage(db_file, access_mode="+")
-            BetterJSONStorage(db_file, access_mode="x")
+class Test_basic_functionality():
+    # assume a file exists, content doesn't matter
+    def test_load_file(self, empty_db_file):
+        BetterJSONStorage(empty_db_file)
 
+    # path is given, file doesn't exist.
+    def test_write_file_noPerm(self, db_file):
+        with pytest.raises(PermissionError):
+            BetterJSONStorage(db_file)
+
+    def test_write_file(self, db_file):
+        BetterJSONStorage(db_file, access_mode='r+')
+        assert db_file.exists()
 
 class Test_path:
     def test_path_is_directory_readonly(self):
         p = Path()  # returns the current working dir
         with pytest.raises(FileNotFoundError):
-            BetterJSONStorage(path=p)
+            BetterJSONStorage(p)
 
     def test_default_path(self):
         with pytest.raises(TypeError):
@@ -72,6 +76,14 @@ class Test_path:
         BetterJSONStorage(db_file, access_mode="r+")
         assert db_file.exists()
 
+class Test_access_modes:
+    def test_acces_mode(self, db_file):
+        BetterJSONStorage(db_file, access_mode="r")
+        BetterJSONStorage(db_file, access_mode="r+")
+        with pytest.raises(AttributeError):
+            BetterJSONStorage(db_file, access_mode="+")
+            BetterJSONStorage(db_file, access_mode="")
+            BetterJSONStorage(db_file, access_mode="x")
 
 class Test_multiple_instances:
     def test_different_paths(self, db_file):
