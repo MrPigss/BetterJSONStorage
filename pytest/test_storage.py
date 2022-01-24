@@ -7,12 +7,6 @@ from tinydb import TinyDB
 
 import pytest
 
-
-@pytest.fixture
-def db_path() -> None:
-    return Path(tempfile.gettempdir())
-
-
 @pytest.fixture
 def db_file() -> None:
     p = Path(tempfile.gettempdir() + "\\db.db")
@@ -35,6 +29,14 @@ def empty_db_file() -> None:
 # Tests
 #
 #
+class Test_args:
+    def test_acces_mode(db_file):
+        BetterJSONStorage(db_file, access_mode="r+")
+        BetterJSONStorage(db_file, access_mode="r")
+        BetterJSONStorage(db_file)
+        with pytest.raises(AttributeError):
+            BetterJSONStorage(db_file, access_mode="+")
+            BetterJSONStorage(db_file, access_mode="x")
 
 
 class Test_path:
