@@ -30,7 +30,7 @@ def empty_db_file() -> None:
 #
 #
 class Test_args:
-    def test_acces_mode(db_file):
+    def test_acces_mode(self, db_file):
         BetterJSONStorage(db_file, access_mode="r+")
         BetterJSONStorage(db_file, access_mode="r")
         BetterJSONStorage(db_file)
