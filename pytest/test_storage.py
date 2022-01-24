@@ -29,6 +29,7 @@ def empty_db_file() -> None:
 # Tests
 #
 #
+
 class Test_basic_functionality():
     # assume a file exists, content doesn't matter
     def test_load_file(self, empty_db_file):
@@ -36,11 +37,12 @@ class Test_basic_functionality():
 
     # path is given, file doesn't exist.
     def test_write_file_noPerm(self, db_file):
-        with pytest.raises(PermissionError):
+        with pytest.raises(FileNotFoundError):
             BetterJSONStorage(db_file)
 
+    # path is given, file doesn't exist permission to write.
     def test_write_file(self, db_file):
-        BetterJSONStorage(db_file, access_mode='r+')
+        BetterJSONStorage(db_file, access_mode="r+")
         assert db_file.exists()
 
 class Test_path:
@@ -77,13 +79,14 @@ class Test_path:
         assert db_file.exists()
 
 class Test_access_modes:
-    def test_acces_mode(self, db_file):
-        BetterJSONStorage(db_file, access_mode="r")
-        BetterJSONStorage(db_file, access_mode="r+")
+    # file exists permissions differ
+    def test_acces_mode(self, empty_db_file):
+        BetterJSONStorage(empty_db_file, access_mode="r")
+        BetterJSONStorage(empty_db_file, access_mode="r+")
         with pytest.raises(AttributeError):
-            BetterJSONStorage(db_file, access_mode="+")
-            BetterJSONStorage(db_file, access_mode="")
-            BetterJSONStorage(db_file, access_mode="x")
+            BetterJSONStorage(empty_db_file, access_mode="+")
+            BetterJSONStorage(empty_db_file, access_mode="")
+            BetterJSONStorage(empty_db_file, access_mode="x")
 
 class Test_multiple_instances:
     def test_different_paths(self, db_file):
@@ -145,5 +148,6 @@ class Test_writes:
         with TinyDB(db_file, access_mode="r+", storage=BetterJSONStorage) as db:
             x = db.insert(test_dict)
 
+        sleep(0.1)
         with TinyDB(db_file, access_mode="r+", storage=BetterJSONStorage) as db:
             assert db.get(doc_id=x) == test_dict
