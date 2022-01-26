@@ -12,7 +12,7 @@ class Access_mode:
         self.private_name = f"_{name}"
 
     def __set__(self, obj, value):
-        if not value in ("r", "r+"):
+        if not value in {"r", "r+"}:
             obj.close()
             raise AttributeError(f'access_mode is not one of ("r", "r+"), :{value}')
         setattr(obj, self.private_name, value)
@@ -89,7 +89,7 @@ class BetterJSONStorage(Storage):
     If the directory specified in `path` does not exist it will only be created if access_mode is set to `'r+'`.
     """
 
-    _paths = []
+    _paths = set()
     _access_mode = Access_mode()
     _path = FilePath()
 
@@ -105,7 +105,7 @@ class BetterJSONStorage(Storage):
             raise AttributeError(
                 f'A BetterJSONStorage object already exists with path < "{path}" >'
             )
-        class_._paths.append(h)
+        class_._paths.add(h)
         instance = object.__new__(class_)
         setattr(instance, "_hash", h)
         return instance

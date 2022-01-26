@@ -20,6 +20,15 @@ License-File: LICENSE.txt
 
 Introduction
 ************
+
+.. image:: https://codecov.io/gh/MrPigss/BetterJSONStorage/branch/master/graph/badge.svg?token=JN69A9GD3D
+    :target: https://codecov.io/gh/MrPigss/BetterJSONStorage
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+.. image:: https://badge.fury.io/py/BetterJSONStorage.svg
+    :target: https://badge.fury.io/py/BetterJSONStorage
+
+
 BetterJSONStorage is a faster 'Storage Type' for TinyDB_.
 It uses the faster Orjson_ library for parsing the JSON and BLOSC_ for compression.
 
@@ -66,8 +75,8 @@ context Manager
 
 extra
 =====
-one difference from TinyDB default JSONStorage is that BetterJSONStorage is ReadOnly by default. 
-use acces_mode='r+' if you want to write as well. 
+one difference from TinyDB default JSONStorage is that BetterJSONStorage is ReadOnly by default.
+use acces_mode='r+' if you want to write as well.
 
 All arguments except for the storage and acces_mode argument are forwarded to the underlying storage.
 You can use this to pass additional keyword arguments to orjson.dumps(…) method.
