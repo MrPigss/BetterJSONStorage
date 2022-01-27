@@ -9,7 +9,7 @@ from tinydb import Query, TinyDB
 def write(db: TinyDB):
     start_write = perf_counter_ns()
     db.drop_tables()
-    for _ in range(1):
+    for _ in range(15):
         for table in data:
             if table not in ("topicNames", "subTopicNames", "topicSubTopics"):
                 db.table(table).insert_multiple(transforms[table])
@@ -21,7 +21,7 @@ def read(db: TinyDB):
     start_read = perf_counter_ns()
     topic = Query()
     subtopic = Query()
-    for _ in range(1):
+    for _ in range(15):
         table = db.table("topics")
         for sub in (
             337184268,

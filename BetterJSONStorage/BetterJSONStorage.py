@@ -1,12 +1,9 @@
 import _thread as Thread
 from pathlib import Path
-from pickle import FALSE
-from time import sleep
 from typing import Mapping
 
 from blosc import compress, decompress
 from orjson import dumps, loads
-from tinydb import TinyDB
 
 
 class Access_mode:
@@ -183,14 +180,3 @@ class BetterJSONStorage:
         while (not self._done) or self._changed:
             ...
         self._running = False
-
-if __name__ == '__main__':
-    test_dict = {"Test": "test"}
-    db_file = Path('tests/test_citm.db')
-    with TinyDB(db_file, access_mode="r+", storage=BetterJSONStorage) as db:
-        x = db.insert(test_dict)
-
-
-    with TinyDB(db_file, storage=BetterJSONStorage) as db:
-        print(db)
-

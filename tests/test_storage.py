@@ -155,3 +155,6 @@ class Test_writes:
         with TinyDB(db_file, storage=BetterJSONStorage) as db:
             assert db.get(doc_id=x) == test_dict
 
+    def test_repr(self, db_file):
+         with TinyDB(db_file, access_mode="r+", storage=BetterJSONStorage) as db:
+           print(db.storage)
