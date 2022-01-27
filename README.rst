@@ -75,10 +75,6 @@ performance
 ************
 The benchmarks are done on fixtures of real data:
 
-For now only storage numbers are available but preliminary testing shows at least 5x faster reads and writes for large inserts or updates.
-When doing a lot of smaller operations, the gap widens tremendously. We have seen 200x faster on some workloads.
-
-
 * citm_catalog.json, 1.7MiB, concert data, containing nested dictionaries of strings and arrays of integers, indented.
 * canada.json, 2.2MiB, coordinates of the Canadian border in GeoJSON format, containing floats and arrays, indented.
 * twitter.json, 631.5KiB, results of a search on Twitter for "一", containing CJK strings, dictionaries of strings and arrays of dictionaries, indented.
@@ -138,3 +134,70 @@ twitter.json
    * - default JSONStorage
      - 574
      - 3.7x
+
+Random generated JSON
+=====================
+
+JSON has been generated on `json-generator <https://app.json-generator.com/6R7FY2v7Bqvc>`_.
+The generated JSON contains 140 items of about 0.7kb each. (100kb total)
+Every test was run 10 times and the average was taken.
+
+init times: the time it takes to instantiate the db and storage:
+ | BetterJSONStorage takes a bit more time to start but this only has to happen once in the beginning.
+ | This was a tradeoff that made it possible for the fast reads and writes we see from BetterJSONStorage.
+
+.. list-table:: avg init times
+   :widths: 25 25
+   :header-rows: 1
+
+   * - storage
+     - time taken in μs
+   * - BetterJSONStorage
+     - 181884
+   * - default JSONStorage
+     - 145234
+
+insert time: the time it took to insert 140 items of around 0.7kb each:
+ | Because BetterJSONStorage uses a seperate thread for writing, the main thread is not blocked.
+ | This means no waiting for fileIO between subsequent writes.
+ | BetterJSONStorage makes sure every thing is writen correctly.
+
+.. list-table:: avg 140x 0,7kb insert
+   :widths: 25 25
+   :header-rows: 1
+
+   * - storage
+     - time taken in μs
+   * - BetterJSONStorage
+     - 41448
+   * - default JSONStorage
+     - 3019673
+
+read times: the time it took to read 140 items of around 0.7kb each:
+ | All reading is done from memory and not from disk.
+ | This means working with very large files can be an issue,
+ | but if you're working on extremely large datasets TinyDB might also not be the right solution for you.
+ | This also means reading is extremely fast.
+ | Data in memory and on disk is always synced in the background so there should be no slowdown even with heavy writing in between reads.
+
+.. list-table:: avg 140x 0.7kb reads
+   :widths: 25 25
+   :header-rows: 1
+
+   * - storage
+     - time taken in μs
+   * - BetterJSONStorage
+     - 1314
+   * - default JSONStorage
+     - 13075
+
+
+Graph
+=====
+
+This is the same data that has een used above poured into a nice excel graph.
+
+.. image:: ./img/diff.png
+    :scale: 100%
+    :width: 60%
+

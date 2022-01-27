@@ -1,0 +1,25 @@
+{
+    "id": "61f2fbe052dddf2f3ec144df",
+    "email": "jill_tran@krog.fishing",
+    "username": "jill88",
+    "profile":
+    {
+        "name": "Jill Tran",
+        "company": "Krog",
+        "dob": "1988-04-09",
+        "address": "33 Harden Street, Matheny, Missouri",
+        "location":
+        {
+            "lat": 48.879835,
+            "long": 138.105851
+        },
+        "about": "Qui ad nisi enim ex excepteur ut ad nostrud non quis. Quis magna sit ut deserunt occaecat enim incididunt."
+    },
+    "apiKey": "f72263de-34c3-4a74-9a69-e69518ef5822",
+    "roles":
+    [
+        "admin"
+    ],
+    "createdAt": "2013-05-14T10:55:05.786Z",
+    "updatedAt": "2013-05-15T10:55:05.786Z"
+}
