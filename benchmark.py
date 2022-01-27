@@ -98,3 +98,10 @@ with TinyDB("benchmark/db/test_citm2.db") as db:
 
 cProfile.run("default()", "benchmark/prof/default_init.prof")
 cProfile.run("better()", "benchmark/prof/better_init.prof")
+
+
+import os
+
+for test in {'init', 'read','write'}:
+    for x in {'default', 'better'}:
+        os.system(f'gprof2dot -f pstats ./benchmark/prof/{x}_{test}.prof | dot -Tpng -o ./benchmark/callgraphs/{x}_{test}.png')
