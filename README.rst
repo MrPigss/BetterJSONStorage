@@ -75,7 +75,9 @@ performance
 ************
 The benchmarks are done on fixtures of real data:
 
-For now only storage numbers are available but preliminary testing shows around 10x faster reads and writes.
+For now only storage numbers are available but preliminary testing shows at least 5x faster reads and writes for large inserts or updates.
+When doing a lot of smaller operations, the gap widens tremendously. We have seen 200x faster on some workloads.
+
 
 * citm_catalog.json, 1.7MiB, concert data, containing nested dictionaries of strings and arrays of integers, indented.
 * canada.json, 2.2MiB, coordinates of the Canadian border in GeoJSON format, containing floats and arrays, indented.
