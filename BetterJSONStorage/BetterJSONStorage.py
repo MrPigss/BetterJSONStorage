@@ -1,32 +1,37 @@
 import _thread as Thread
 from pathlib import Path
+from pickle import FALSE
+from time import sleep
 from typing import Mapping
 
 from blosc import compress, decompress
 from orjson import dumps, loads
-from tinydb import Storage
 
 
 class Access_mode:
+    __slots__ = "name"
+
     def __set_name__(self, owner, name):
-        self.private_name = f"_{name}"
+        self.name = f"{name}_"
 
     def __set__(self, obj, value):
         if not value in {"r", "r+"}:
             obj.close()
             raise AttributeError(f'access_mode is not one of ("r", "r+"), :{value}')
-        setattr(obj, self.private_name, value)
+        setattr(obj, self.name, value)
 
     def __get__(self, obj, objtype=None):
-        return getattr(obj, self.private_name)
+        return getattr(obj, self.name)
 
 
 class FilePath:
-    def __set_name__(self, owner, name):
-        self.private_name = f"_{name}"
+    __slots__ = "name"
+
+    def __set_name__(self, _, name):
+        self.name = f"{name}_"
 
     def __set__(self, obj, path):
-        setattr(obj, self.private_name, path)
+        setattr(obj, self.name, path)
         if not isinstance(path, Path):
             obj.close()
             raise TypeError("path is not an instance of pathlib.Path")
@@ -48,11 +53,11 @@ class FilePath:
                 f"""path does not lead to a file: <{path.absolute()}>."""
             )
 
-    def __get__(self, obj, objtype=None):
-        return getattr(obj, self.private_name)
+    def __get__(self, obj, _=None):
+        return getattr(obj, self.name)
 
 
-class BetterJSONStorage(Storage):
+class BetterJSONStorage:
     """
     A class that represents a storage interface for reading and writing to a file.
 
@@ -89,6 +94,17 @@ class BetterJSONStorage(Storage):
     If the directory specified in `path` does not exist it will only be created if access_mode is set to `'r+'`.
     """
 
+    __slots__ = (
+        "_hash",
+        "_access_mode_",
+        "_path_",
+        "_handle",
+        "_kwargs",
+        "_changed",
+        "_running",
+        "_done"
+    )
+
     _paths = set()
     _access_mode = Access_mode()
     _path = FilePath()
@@ -98,6 +114,9 @@ class BetterJSONStorage(Storage):
         self._path = path
         self._kwargs = kwargs
         self.load()
+        self._changed = 0
+        self._running = True
+        Thread.start_new_thread(self._write_async, ())
 
     def __new__(class_, path, *args, **kwargs):
         h = hash(path)
@@ -122,22 +141,38 @@ class BetterJSONStorage(Storage):
         return self._handle
 
     def _write_async(self):
-        if self._handle:
-            with open(self._path, mode="wb") as f:
-                f.write(compress(dumps(self._handle, **self._kwargs)))
+        # loop while storage is active
+        while self._running:
+
+            # check for changes:
+            # use a while loop. As long as the data is being changed, it will keep writing.
+            # when a large file is being written and the data changes again it will immediatly rewrite the file.
+            # even if the storage was closed.
+            while self._changed:
+                self._done = False
+                self._changed = False
+                self._path.write_bytes(compress(dumps(self._handle)))
+                self._done = True
+
+        print("done writing")
 
     def write(self, data: Mapping) -> None:
         if not self._access_mode == "r+":
             raise PermissionError("Storage is openend as read only")
         self._handle = data
-        Thread.start_new_thread(self._write_async, ())
+        self._changed = True
 
     def load(self) -> None:
         if len(db_bytes := self._path.read_bytes()):
+
             self._handle = loads(decompress(db_bytes))
         else:
             self._handle = None
 
     def close(self):
-        if self._hash in (p := self.__class__._paths):
-            p.remove(self._hash)
+        self._running = False
+        self.__class__._paths.discard(self._hash)
+
+        # this will keep the main thread running if the writer thread is not done yet.
+        while not self._done:
+            ...
