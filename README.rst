@@ -4,6 +4,15 @@
 
 Introduction
 ************
+
+.. image:: https://codecov.io/gh/MrPigss/BetterJSONStorage/branch/master/graph/badge.svg?token=JN69A9GD3D
+    :target: https://codecov.io/gh/MrPigss/BetterJSONStorage
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+.. image:: https://badge.fury.io/py/BetterJSONStorage.svg
+    :target: https://badge.fury.io/py/BetterJSONStorage
+
+
 BetterJSONStorage is a faster 'Storage Type' for TinyDB_.
 It uses the faster Orjson_ library for parsing the JSON and BLOSC_ for compression.
 
@@ -50,8 +59,8 @@ context Manager
 
 extra
 =====
-one difference from TinyDB default JSONStorage is that BetterJSONStorage is ReadOnly by default. 
-use acces_mode='r+' if you want to write as well. 
+one difference from TinyDB default JSONStorage is that BetterJSONStorage is ReadOnly by default.
+use acces_mode='r+' if you want to write as well.
 
 All arguments except for the storage and acces_mode argument are forwarded to the underlying storage.
 You can use this to pass additional keyword arguments to orjson.dumps(…) method.
@@ -66,7 +75,9 @@ performance
 ************
 The benchmarks are done on fixtures of real data:
 
-For now only storage numbers are available but preliminary testing shows around 10x faster reads and writes.
+For now only storage numbers are available but preliminary testing shows at least 5x faster reads and writes for large inserts or updates.
+When doing a lot of smaller operations, the gap widens tremendously. We have seen 200x faster on some workloads.
+
 
 * citm_catalog.json, 1.7MiB, concert data, containing nested dictionaries of strings and arrays of integers, indented.
 * canada.json, 2.2MiB, coordinates of the Canadian border in GeoJSON format, containing floats and arrays, indented.
