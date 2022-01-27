@@ -6,6 +6,7 @@ from typing import Mapping
 
 from blosc import compress, decompress
 from orjson import dumps, loads
+from tinydb import TinyDB
 
 
 class Access_mode:
@@ -102,7 +103,7 @@ class BetterJSONStorage:
         "_kwargs",
         "_changed",
         "_running",
-        "_done"
+        "_done",
     )
 
     _paths = set()
@@ -110,12 +111,20 @@ class BetterJSONStorage:
     _path = FilePath()
 
     def __init__(self, path: Path = Path(), access_mode: str = "r", **kwargs):
+
+        # flags
+        self._running = True
+        self._done = True
+        self._changed = False
+
+        # descriptors
         self._access_mode = access_mode
         self._path = path
+
+        # rest
         self._kwargs = kwargs
         self.load()
-        self._changed = 0
-        self._running = True
+
         Thread.start_new_thread(self._write_async, ())
 
     def __new__(class_, path, *args, **kwargs):
@@ -129,8 +138,8 @@ class BetterJSONStorage:
         setattr(instance, "_hash", h)
         return instance
 
-    def __del__(self):
-        self.close()
+    # def __del__(self):
+    #     self.close()
 
     def __repr__(self):
         return (
@@ -154,8 +163,6 @@ class BetterJSONStorage:
                 self._path.write_bytes(compress(dumps(self._handle)))
                 self._done = True
 
-        print("done writing")
-
     def write(self, data: Mapping) -> None:
         if not self._access_mode == "r+":
             raise PermissionError("Storage is openend as read only")
@@ -170,9 +177,20 @@ class BetterJSONStorage:
             self._handle = None
 
     def close(self):
-        self._running = False
         self.__class__._paths.discard(self._hash)
 
         # this will keep the main thread running if the writer thread is not done yet.
-        while not self._done:
+        while (not self._done) or self._changed:
             ...
+        self._running = False
+
+if __name__ == '__main__':
+    test_dict = {"Test": "test"}
+    db_file = Path('tests/test_citm.db')
+    with TinyDB(db_file, access_mode="r+", storage=BetterJSONStorage) as db:
+        x = db.insert(test_dict)
+
+
+    with TinyDB(db_file, storage=BetterJSONStorage) as db:
+        print(db)
+
