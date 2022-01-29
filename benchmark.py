@@ -104,4 +104,4 @@ import os
 
 for test in {'init', 'read','write'}:
     for x in {'default', 'better'}:
-        os.system(f'gprof2dot -f pstats ./benchmark/prof/{x}_{test}.prof | dot -Tpng -o ./benchmark/callgraphs/{x}_{test}.png')
+        os.system(f'gprof2dot -n0 -e0 -f pstats ./benchmark/prof/{x}_{test}.prof | dot -Tpng -o ./benchmark/callgraphs/{x}_{test}.png')
