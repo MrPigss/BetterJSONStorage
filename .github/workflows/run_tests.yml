@@ -16,27 +16,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: checkout
-      uses: actions/checkout@v2
-    
-    - name: Python Pip Install
-      uses: logikal-code/pip-install@v1.0.0
-      with:
-        requirements: mypy
-
-    - name: Setup Python
-      uses: actions/setup-python@master
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@master
       with:
         python-version: 3.6
         architecture: x64 
-        
-    - name: pytest-cov
-      uses: lpenz/ghaction-pytest-cov@v1
-        
-    - name: Black Code Formatter
-      uses: lgeiger/black-action@master
-      
-    - name: Python Cov
-      uses: orgoro/coverage@v2.1
-      with:
+    - run: pip install mypy
+    - uses: lpenz/ghaction-pytest-cov@v1
+    - uses: lgeiger/black-action@master
+    - uses: orgoro/coverage@v2.1
+    - with:
         coverageFile: coverage.xml
