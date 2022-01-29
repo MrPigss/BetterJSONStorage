@@ -17,7 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Setup Python
-      uses: actions/setup-python@master
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@master
       with:
         python-version: 3.6
         architecture: x64 
