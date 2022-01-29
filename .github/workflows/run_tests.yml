@@ -25,7 +25,7 @@ jobs:
         python-version: 3.6
         architecture: x64 
     - name: mypy
-      run: pip install mypy
+      run: pip install pytest-mypy
       
     - name: pytest-cov
       uses: lpenz/ghaction-pytest-cov@v1
