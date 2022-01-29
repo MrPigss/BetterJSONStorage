@@ -22,7 +22,7 @@ jobs:
     - name: install python
       uses: actions/setup-python@master
       with:
-        python-version: 3.6
+        python-version: 3.8
         architecture: x64 
     - name: mypy
       run: pip install pytest-mypy
