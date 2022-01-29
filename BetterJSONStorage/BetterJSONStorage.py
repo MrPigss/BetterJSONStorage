@@ -1,6 +1,6 @@
 import _thread as Thread
 from pathlib import Path
-from typing import Mapping
+from typing import Literal, Mapping, Optional, Set
 
 from blosc import compress, decompress
 from orjson import dumps, loads
@@ -9,10 +9,10 @@ from orjson import dumps, loads
 class Access_mode:
     __slots__ = "name"
 
-    def __set_name__(self, owner, name):
+    def __set_name__(self, owner, name: str):
         self.name = f"{name}_"
 
-    def __set__(self, obj, value):
+    def __set__(self, obj, value: str):
         if not value in {"r", "r+"}:
             obj.close()
             raise AttributeError(f'access_mode is not one of ("r", "r+"), :{value}')
@@ -25,10 +25,10 @@ class Access_mode:
 class FilePath:
     __slots__ = "name"
 
-    def __set_name__(self, _, name):
+    def __set_name__(self, _, name: str):
         self.name = f"{name}_"
 
-    def __set__(self, obj, path):
+    def __set__(self, obj, path: Path):
         setattr(obj, self.name, path)
         if not isinstance(path, Path):
             obj.close()
@@ -103,26 +103,30 @@ class BetterJSONStorage:
         "_done",
     )
 
-    _paths = set()
+    _paths: Set[int] = set()
     _access_mode = Access_mode()
     _path = FilePath()
 
-    def __init__(self, path: Path = Path(), access_mode: str = "r", **kwargs):
-
+    def __init__(
+        self, path: Path = Path(), access_mode: Literal["r", "r+"] = "r", **kwargs
+    ):
         # flags
         self._running = True
         self._done = True
         self._changed = False
 
         # descriptors
+        self._hash = hash(path)
         self._access_mode = access_mode
         self._path = path
 
         # rest
         self._kwargs = kwargs
-        self.load()
+        self._handle: Optional[Mapping]
 
-        Thread.start_new_thread(self._write_async, ())
+        # finishing init
+        self.load()
+        Thread.start_new_thread(self.__file_writer, ())
 
     def __new__(class_, path, *args, **kwargs):
         h = hash(path)
@@ -132,21 +136,17 @@ class BetterJSONStorage:
             )
         class_._paths.add(h)
         instance = object.__new__(class_)
-        setattr(instance, "_hash", h)
         return instance
-
-    # def __del__(self):
-    #     self.close()
 
     def __repr__(self):
         return (
             f"""BetterJSONStorage(path={self._path}, Paths={self.__class__._paths})"""
         )
 
-    def read(self) -> Mapping:
+    def read(self):
         return self._handle
 
-    def _write_async(self):
+    def __file_writer(self):
         # loop while storage is active
         while self._running:
 
@@ -160,7 +160,7 @@ class BetterJSONStorage:
                 self._path.write_bytes(compress(dumps(self._handle)))
                 self._done = True
 
-    def write(self, data: Mapping) -> None:
+    def write(self, data: Mapping):
         if not self._access_mode == "r+":
             raise PermissionError("Storage is openend as read only")
         self._handle = data
@@ -174,9 +174,8 @@ class BetterJSONStorage:
             self._handle = None
 
     def close(self):
-        self.__class__._paths.discard(self._hash)
-
         # this will keep the main thread running if the writer thread is not done yet.
         while (not self._done) or self._changed:
             ...
         self._running = False
+        self.__class__._paths.discard(self._hash)

@@ -1,4 +1,3 @@
-from operator import truediv
 import os
 import tempfile
 from pathlib import Path
@@ -9,7 +8,7 @@ from tinydb import TinyDB
 import pytest
 
 @pytest.fixture
-def db_file() -> None:
+def db_file():
     p = Path(tempfile.gettempdir() + "\\db.db")
     yield p
     if p.exists():
@@ -17,7 +16,7 @@ def db_file() -> None:
 
 
 @pytest.fixture
-def empty_db_file() -> None:
+def empty_db_file():
     p = Path(tempfile.gettempdir() + "\\empty.db")
     p.touch()
     Path("empty.db").write_bytes(b"")
@@ -47,6 +46,11 @@ class Test_basic_functionality():
         assert db_file.exists()
 
 class Test_path:
+    def test_path_is_not_if_type_Path(self):
+        p = './db/test_citm.db'
+        with pytest.raises(TypeError):
+            BetterJSONStorage(p).close()
+
     def test_path_is_directory_readonly(self):
         p = Path()  # returns the current working dir
         with pytest.raises(FileNotFoundError):

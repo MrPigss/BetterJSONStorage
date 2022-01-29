@@ -4,9 +4,7 @@ from orjson import loads
 from tinydb import TinyDB
 from BetterJSONStorage import BetterJSONStorage
 from time import perf_counter_ns as perf, sleep
-import seaborn as sns
 
-sns.set_theme()
 with open("tests/random_100kb.json", "rb") as f:
     data = loads(f.read())
 
@@ -17,12 +15,15 @@ def read(db: TinyDB):
     db.insert_multiple(data)
     print(db.get(doc_id=1))
 
+
 def write(db):
     for item in data:
         db.insert(item)
 
 
-scores = {'writes': {"BetterJSONStorage": [], "default_inserts": []}}
+scores: dict[str, dict[str, list]] = {
+    "writes": {"BetterJSONStorage": [], "default_inserts": []}
+}
 db_file = Path("tests/random_100k.db")
 
 if db_file.exists():
@@ -35,7 +36,7 @@ for _ in range(10):
         start = perf()
         # write(db)
         read(db)
-        scores['writes']["BetterJSONStorage"].append(perf() - start)
+        scores["writes"]["BetterJSONStorage"].append(perf() - start)
 
     sleep(0.1)
     if db_file.exists():
@@ -46,7 +47,7 @@ for _ in range(10):
         start = perf()
         # write(db)
         read(db)
-        scores['writes']["default_inserts"].append(perf() - start)
+        scores["writes"]["default_inserts"].append(perf() - start)
     sleep(0.1)
     if db_file.exists():
         os.remove(db_file)
