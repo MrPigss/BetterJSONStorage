@@ -24,16 +24,7 @@ jobs:
       with:
         python-version: 3.8
         architecture: x64 
-    - name: mypy
-      run: pip install pytest-mypy
-      
-    - name: pytest-cov
-      uses: lpenz/ghaction-pytest-cov@v1
       
     - name: Black formatter
       uses: lgeiger/black-action@master
-      
-    - name: coverage
-      uses: orgoro/coverage@v2.1
-      with:
-        coverageFile: coverage.xml
+
