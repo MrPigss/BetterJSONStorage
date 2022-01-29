@@ -16,14 +16,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@master
+    
+    - name: Check out repository
+      uses: actions/checkout@v2
+    - name: install python
+      uses: actions/setup-python@master
       with:
         python-version: 3.6
         architecture: x64 
-    - run: pip install mypy
-    - uses: lpenz/ghaction-pytest-cov@v1
-    - uses: lgeiger/black-action@master
-    - uses: orgoro/coverage@v2.1
-    - with:
+    - name: mypy
+      run: pip install mypy
+      
+    - name: pytest-cov
+      uses: lpenz/ghaction-pytest-cov@v1
+      
+    - name: Black formatter
+      uses: lgeiger/black-action@master
+      
+    - name: coverage
+      uses: orgoro/coverage@v2.1
+      with:
         coverageFile: coverage.xml
