@@ -80,11 +80,15 @@ for topic in transforms["topicNames"]:
 
 
 def better():
-    with TinyDB(Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage) as db: ...
+    with TinyDB(Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage) as db:
+        db.insert({'a':'b'})
+    pass
 
 
 def default():
-    with TinyDB("benchmark/db/test_citm2.db") as db: ...
+    with TinyDB("benchmark/db/test_citm2.db") as db:
+        db.insert({'a':'b'})
+    pass
 
 with TinyDB(
     Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage

@@ -100,7 +100,7 @@ class BetterJSONStorage:
         "_kwargs",
         "_changed",
         "_running",
-        "_done",
+        "_shutdown_lock",
     )
 
     _paths: Set[int] = set()
@@ -111,8 +111,8 @@ class BetterJSONStorage:
         self, path: Path = Path(), access_mode: Literal["r", "r+"] = "r", **kwargs
     ):
         # flags
+        self._shutdown_lock = Thread.allocate_lock()
         self._running = True
-        self._done = True
         self._changed = False
 
         # descriptors
@@ -147,18 +147,14 @@ class BetterJSONStorage:
         return self._handle
 
     def __file_writer(self):
-        # loop while storage is active
+        self._shutdown_lock.acquire()
         while self._running:
 
-            # check for changes:
-            # use a while loop. As long as the data is being changed, it will keep writing.
-            # when a large file is being written and the data changes again it will immediatly rewrite the file.
-            # even if the storage was closed.
-            while self._changed:
-                self._done = False
+            if self._changed:
                 self._changed = False
                 self._path.write_bytes(compress(dumps(self._handle)))
-                self._done = True
+
+        self._shutdown_lock.release()
 
     def write(self, data: Mapping):
         if not self._access_mode == "r+":
@@ -174,8 +170,7 @@ class BetterJSONStorage:
             self._handle = None
 
     def close(self):
-        # this will keep the main thread running if the writer thread is not done yet.
-        while (not self._done) or self._changed:
-            ...
+        while self._changed:...
         self._running = False
+        self._shutdown_lock.acquire()
         self.__class__._paths.discard(self._hash)
