@@ -25,7 +25,7 @@ var/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
-*.egg-info/
+\*.egg-info\
 .installed.cfg
 *.egg
 MANIFEST
@@ -44,7 +44,7 @@ pip-delete-this-directory.txt
 htmlcov/
 .tox/
 .nox/
-.coverage
+.coverage*
 .coverage.*
 .cache
 nosetests.xml
@@ -53,7 +53,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
-
+codecov*
 # Translations
 *.mo
 *.pot
