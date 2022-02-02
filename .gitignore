@@ -1,5 +1,5 @@
 .*
-*.xml
-*.exe
-*\__pycache__
+\*.exe
 !/.gitignore
+\__pycache__
+coverage.xml
