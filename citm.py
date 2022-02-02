@@ -2,8 +2,9 @@ from pathlib import Path
 from time import perf_counter_ns
 
 import orjson
-from BetterJSONStorage import BetterJSONStorage
 from tinydb import Query, TinyDB
+
+from BetterJSONStorage import BetterJSONStorage
 
 
 def write(db: TinyDB):
@@ -14,7 +15,7 @@ def write(db: TinyDB):
             if table not in ("topicNames", "subTopicNames", "topicSubTopics"):
                 db.table(table).insert_multiple(transforms[table])
         db.table("topics").insert_multiple(topics)
-    print(f'\t{perf_counter_ns()-start_write}ns writing')
+    print(f"\t{perf_counter_ns()-start_write}ns writing")
 
 
 def read(db: TinyDB):
@@ -37,7 +38,7 @@ def read(db: TinyDB):
             337184279,
         ):
             table.get(topic.subtopic.any(subtopic.id == sub))
-    print(f'\t{perf_counter_ns()-start_read}ns reading')
+    print(f"\t{perf_counter_ns()-start_read}ns reading")
 
 
 # load citm.json
@@ -83,7 +84,9 @@ for topic in transforms["topicNames"]:
     )
 
 start = perf_counter_ns()
-with TinyDB(Path("benchmark/db/test_citm.db"), access_mode='r+', storage=BetterJSONStorage) as db:
+with TinyDB(
+    Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage
+) as db:
     write(db)
     read(db)
 end_threaded = perf_counter_ns() - start

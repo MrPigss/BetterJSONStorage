@@ -19,6 +19,7 @@ setuptools.setup(
     ],
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
-    install_requires=['tinydb', 'orjson','blosc'],
+    install_requires=["tinydb", "orjson", "blosc", "mypy"],
     python_requires=">=3.6",
+    setup_requires=["isort"],
 )

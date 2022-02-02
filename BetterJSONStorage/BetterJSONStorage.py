@@ -170,7 +170,8 @@ class BetterJSONStorage:
             self._handle = None
 
     def close(self):
-        while self._changed:...
+        while self._changed:
+            ...
         self._running = False
         self._shutdown_lock.acquire()
         self.__class__._paths.discard(self._hash)

@@ -6,6 +6,7 @@ from tinydb import Query, TinyDB
 
 from BetterJSONStorage import BetterJSONStorage
 
+
 # benchmark for writing
 def write(db: TinyDB):
     db.drop_tables()
@@ -80,15 +81,18 @@ for topic in transforms["topicNames"]:
 
 
 def better():
-    with TinyDB(Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage) as db:
-        db.insert({'a':'b'})
+    with TinyDB(
+        Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage
+    ) as db:
+        db.insert({"a": "b"})
     pass
 
 
 def default():
     with TinyDB("benchmark/db/test_citm2.db") as db:
-        db.insert({'a':'b'})
+        db.insert({"a": "b"})
     pass
+
 
 with TinyDB(
     Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage
@@ -106,6 +110,8 @@ cProfile.run("better()", "benchmark/prof/better_init.prof")
 
 import os
 
-for test in {'init', 'read','write'}:
-    for x in {'default', 'better'}:
-        os.system(f'gprof2dot -n0 -e0 -f pstats ./benchmark/prof/{x}_{test}.prof | dot -Tpng -o ./benchmark/callgraphs/{x}_{test}.png')
+for test in {"init", "read", "write"}:
+    for x in {"default", "better"}:
+        os.system(
+            f"gprof2dot -n0 -e0 -f pstats ./benchmark/prof/{x}_{test}.prof | dot -Tpng -o ./benchmark/callgraphs/{x}_{test}.png"
+        )
