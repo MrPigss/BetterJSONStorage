@@ -49,7 +49,7 @@ context Manager
 
     path = Path('relative/path/to/file.db')
 
-    with TinyDB(path, storage=BetterJSONStorage) as db:
+    with TinyDB(path, access_mode="r+", storage=BetterJSONStorage) as db:
         db.insert({'int': 1, 'char': 'a'})
         db.insert({'int': 1, 'char': 'b'})
 
@@ -60,9 +60,9 @@ context Manager
 extra
 =====
 one difference from TinyDB default JSONStorage is that BetterJSONStorage is ReadOnly by default.
-use acces_mode='r+' if you want to write as well.
+use access_mode='r+' if you want to write as well.
 
-All arguments except for the storage and acces_mode argument are forwarded to the underlying storage.
+All arguments except for the storage and access_mode argument are forwarded to the underlying storage.
 You can use this to pass additional keyword arguments to orjson.dumps(…) method.
 
 For all options see the `orjson documentation <https://github.com/ijl/orjson#option>`_.

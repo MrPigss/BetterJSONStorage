@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: BetterJSONStorage
-Version: 1.2.1
+Version: 1.2.4
 Summary: An optimized tinyDB storage extension
 Home-page: https://github.com/MrPigss/BetterJSONStorage
 Author: Thomas Eeckhout
@@ -12,7 +12,6 @@ Classifier: Operating System :: OS Independent
 Classifier: Topic :: Database
 Requires-Python: >=3.6
 Description-Content-Type: text/x-rst
-License-File: LICENSE.txt
 
 .. image:: https://raw.githubusercontent.com/MrPigss/BetterJSONStorage/master/img/logo.png
     :scale: 100%
@@ -76,9 +75,9 @@ context Manager
 extra
 =====
 one difference from TinyDB default JSONStorage is that BetterJSONStorage is ReadOnly by default.
-use acces_mode='r+' if you want to write as well.
+use access_mode='r+' if you want to write as well.
 
-All arguments except for the storage and acces_mode argument are forwarded to the underlying storage.
+All arguments except for the storage and access_mode argument are forwarded to the underlying storage.
 You can use this to pass additional keyword arguments to orjson.dumps(…) method.
 
 For all options see the `orjson documentation <https://github.com/ijl/orjson#option>`_.

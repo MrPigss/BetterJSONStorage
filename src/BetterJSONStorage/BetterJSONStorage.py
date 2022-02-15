@@ -5,56 +5,6 @@ from typing import Literal, Mapping, Optional, Set
 from blosc import compress, decompress
 from orjson import dumps, loads
 
-
-class Access_mode:
-    __slots__ = "name"
-
-    def __set_name__(self, owner, name: str):
-        self.name = f"{name}_"
-
-    def __set__(self, obj, value: str):
-        if not value in {"r", "r+"}:
-            obj.close()
-            raise AttributeError(f'access_mode is not one of ("r", "r+"), :{value}')
-        setattr(obj, self.name, value)
-
-    def __get__(self, obj, objtype=None):
-        return getattr(obj, self.name)
-
-
-class FilePath:
-    __slots__ = "name"
-
-    def __set_name__(self, _, name: str):
-        self.name = f"{name}_"
-
-    def __set__(self, obj, path: Path):
-        setattr(obj, self.name, path)
-        if not isinstance(path, Path):
-            obj.close()
-            raise TypeError("path is not an instance of pathlib.Path")
-
-        if not path.exists():
-            if obj._access_mode == "r":
-                obj.close()
-                raise FileNotFoundError(
-                    f"""File can't be found, use access_mode='r+' if you wan to create it.
-                        Path: <{path.absolute()}>,
-                        """
-                )
-            path.parent.mkdir(parents=True, exist_ok=True)
-            path.touch()
-
-        if not path.is_file():
-            obj.close()
-            raise FileNotFoundError(
-                f"""path does not lead to a file: <{path.absolute()}>."""
-            )
-
-    def __get__(self, obj, _=None):
-        return getattr(obj, self.name)
-
-
 class BetterJSONStorage:
     """
     A class that represents a storage interface for reading and writing to a file.
@@ -94,8 +44,8 @@ class BetterJSONStorage:
 
     __slots__ = (
         "_hash",
-        "_access_mode_",
-        "_path_",
+        "_access_mode",
+        "_path",
         "_handle",
         "_kwargs",
         "_changed",
@@ -104,8 +54,6 @@ class BetterJSONStorage:
     )
 
     _paths: Set[int] = set()
-    _access_mode = Access_mode()
-    _path = FilePath()
 
     def __init__(
         self, path: Path = Path(), access_mode: Literal["r", "r+"] = "r", **kwargs
@@ -115,8 +63,34 @@ class BetterJSONStorage:
         self._running = True
         self._changed = False
 
-        # descriptors
+        # checks
         self._hash = hash(path)
+
+        if not access_mode in {"r", "r+"}:
+            self.close()
+            raise AttributeError(f'access_mode is not one of ("r", "r+"), :{access_mode}')
+
+        if not isinstance(path, Path):
+            self.close()
+            raise TypeError("path is not an instance of pathlib.Path")
+
+        if not path.exists():
+            if access_mode == "r":
+                self.close()
+                raise FileNotFoundError(
+                    f"""File can't be found, use access_mode='r+' if you wan to create it.
+                        Path: <{path.absolute()}>,
+                        """
+                )
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.touch()
+
+        if not path.is_file():
+            self.close()
+            raise FileNotFoundError(
+                f"""path does not lead to a file: <{path.absolute()}>."""
+            )
+
         self._access_mode = access_mode
         self._path = path
 
