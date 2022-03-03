@@ -14,7 +14,7 @@ Introduction
 
 
 BetterJSONStorage is a faster 'Storage Type' for TinyDB_.
-It uses the faster Orjson_ library for parsing the JSON and BLOSC_ for compression.
+It uses the faster Orjson_ library for parsing the JSON and BLOSC2_ for compression.
 
 Parsing, compressing, and writing to the file is done by a seperate thread so reads don't get blocked by slow fileIO.
 Smaller filesizes result in faster reading and writing (less diskIO).
@@ -55,7 +55,7 @@ context Manager
 
 .. _TinyDB: https://github.com/msiemens/tinydb
 .. _Orjson: https://github.com/ijl/orjson
-.. _BLOSC: https://github.com/Blosc/python-blosc
+.. _BLOSC2: https://github.com/Blosc/python-blosc2
 
 extra
 =====

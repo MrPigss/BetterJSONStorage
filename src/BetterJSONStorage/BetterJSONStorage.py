@@ -2,7 +2,7 @@ import _thread as Thread
 from pathlib import Path
 from typing import Literal, Mapping, Optional, Set
 
-from blosc import compress, decompress
+from blosc2 import compress, decompress
 from orjson import dumps, loads
 
 class BetterJSONStorage:
