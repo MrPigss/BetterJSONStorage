@@ -1,4 +1,4 @@
 tinydb
 orjson
-blosc
+blosc2
 mypy

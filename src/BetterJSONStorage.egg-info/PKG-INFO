@@ -1,10 +1,10 @@
 Metadata-Version: 2.1
 Name: BetterJSONStorage
-Version: 1.2.4
+Version: 1.2.5
 Summary: An optimized tinyDB storage extension
 Home-page: https://github.com/MrPigss/BetterJSONStorage
 Author: Thomas Eeckhout
-Author-email: Thomas.Eeckhout@outook.be
+Author-email: Thomas.Eeckhout@outlook.be
 License: UNKNOWN
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
@@ -29,7 +29,7 @@ Introduction
 
 
 BetterJSONStorage is a faster 'Storage Type' for TinyDB_.
-It uses the faster Orjson_ library for parsing the JSON and BLOSC_ for compression.
+It uses the faster Orjson_ library for parsing the JSON and BLOSC2_ for compression.
 
 Parsing, compressing, and writing to the file is done by a seperate thread so reads don't get blocked by slow fileIO.
 Smaller filesizes result in faster reading and writing (less diskIO).
@@ -64,13 +64,13 @@ context Manager
 
     path = Path('relative/path/to/file.db')
 
-    with TinyDB(path, storage=BetterJSONStorage) as db:
+    with TinyDB(path, access_mode="r+", storage=BetterJSONStorage) as db:
         db.insert({'int': 1, 'char': 'a'})
         db.insert({'int': 1, 'char': 'b'})
 
 .. _TinyDB: https://github.com/msiemens/tinydb
 .. _Orjson: https://github.com/ijl/orjson
-.. _BLOSC: https://github.com/Blosc/python-blosc
+.. _BLOSC2: https://github.com/Blosc/python-blosc2
 
 extra
 =====

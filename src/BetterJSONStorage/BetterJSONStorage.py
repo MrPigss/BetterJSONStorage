@@ -46,11 +46,12 @@ class BetterJSONStorage:
         "_hash",
         "_access_mode",
         "_path",
-        "_handle",
+        "_data",
         "_kwargs",
         "_changed",
         "_running",
         "_shutdown_lock",
+        "_handle"
     )
 
     _paths: Set[int] = set()
@@ -83,20 +84,21 @@ class BetterJSONStorage:
                         """
                 )
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.touch()
-
+            self._handle = path.open('wb+')
         if not path.is_file():
             self.close()
             raise FileNotFoundError(
                 f"""path does not lead to a file: <{path.absolute()}>."""
             )
+        else:
+            self._handle = path.open('wb')
 
         self._access_mode = access_mode
         self._path = path
 
         # rest
         self._kwargs = kwargs
-        self._handle: Optional[Mapping]
+        self._data: Optional[Mapping]
 
         # finishing init
         self.load()
@@ -118,7 +120,7 @@ class BetterJSONStorage:
         )
 
     def read(self):
-        return self._handle
+        return self._data
 
     def __file_writer(self):
         self._shutdown_lock.acquire()
@@ -126,26 +128,28 @@ class BetterJSONStorage:
 
             if self._changed:
                 self._changed = False
-                self._path.write_bytes(compress(dumps(self._handle)))
+                self._handle.write(compress(dumps(self._data)))
 
         self._shutdown_lock.release()
 
     def write(self, data: Mapping):
         if not self._access_mode == "r+":
             raise PermissionError("Storage is openend as read only")
-        self._handle = data
+        self._data = data
         self._changed = True
 
     def load(self) -> None:
         if len(db_bytes := self._path.read_bytes()):
 
-            self._handle = loads(decompress(db_bytes))
+            self._data = loads(decompress(db_bytes))
         else:
-            self._handle = None
+            self._data = None
 
     def close(self):
         while self._changed:
             ...
         self._running = False
         self._shutdown_lock.acquire()
+        self._handle.flush()
+        self._handle.close()
         self.__class__._paths.discard(self._hash)
