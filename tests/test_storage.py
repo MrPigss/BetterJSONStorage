@@ -19,7 +19,7 @@ def db_file():
 def empty_db_file():
     p = Path(tempfile.gettempdir() + "\\empty.db")
     p.touch()
-    Path("empty.db").write_bytes(b"")
+    p.write_bytes(b"")
     yield p
     if p.exists():
         os.remove(p)
@@ -46,8 +46,8 @@ class Test_basic_functionality():
         assert db_file.exists()
 
 class Test_path:
-    def test_path_is_not_if_type_Path(self):
-        p = './db/test_citm.db'
+    def test_path_is_not_of_type_Path(self):
+        p = './data/test_citm.db'
         with pytest.raises(TypeError):
             BetterJSONStorage(p).close()
 
@@ -123,7 +123,7 @@ class Test_reads:
                 {"id": "337184283", "name": "Concert"},
             ],
         }
-        p = Path("tests/db/test_citm.db")
+        p = Path("tests/data/test_citm.db")
         with TinyDB(p, storage=BetterJSONStorage) as db:
             assert db.table("topics").get(doc_id=1) == doc
 

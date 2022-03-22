@@ -1,3 +1,4 @@
+LICENSE.txt
 README.rst
 setup.cfg
 setup.py

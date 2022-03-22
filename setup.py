@@ -5,7 +5,7 @@ with open("README.rst", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="BetterJSONStorage",
-    version="1.2.5",
+    version="1.2.6",
     author="Thomas Eeckhout",
     author_email="Thomas.Eeckhout@outlook.be",
     description="An optimized tinyDB storage extension",
@@ -20,6 +20,6 @@ setuptools.setup(
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     install_requires=["tinydb", "orjson", "blosc2", "mypy"],
-    python_requires=">=3.6",
+    python_requires=">=3.8",
     setup_requires=["isort"],
 )
