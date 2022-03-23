@@ -4,13 +4,14 @@ from orjson import loads
 from tinydb import TinyDB
 from BetterJSONStorage import BetterJSONStorage
 from time import perf_counter_ns as perf, sleep
-from tempfile import TemporaryFile
+import tabulate
 
 json_file = Path("tests/data/random_100kb.json")
 db_file = Path("tests/data/random_100k.db")
 
 scores: dict[str, dict[str, list]] = {
-    "writes": {"BetterJSONStorage": [], "default_inserts": []}
+    "writes": {"BetterJSONStorage": [], "default_inserts": []},
+    "reads": {"BetterJSONStorage": [], "default_inserts": []}
 }
 
 with open(json_file, "rb") as f:
@@ -33,9 +34,11 @@ for _ in range(10):
         Path(db_file), access_mode="r+", storage=BetterJSONStorage
     ) as db:
         start = perf()
-        # write(db)
-        read(db)
+        write(db)
         scores["writes"]["BetterJSONStorage"].append(perf() - start)
+        start = perf()
+        read(db)
+        scores["reads"]["BetterJSONStorage"].append(perf() - start)
 
     sleep(0.1)
     if db_file.exists():
@@ -44,13 +47,19 @@ for _ in range(10):
 for _ in range(10):
     with TinyDB(db_file, encoding="utf8") as db:
         start = perf()
-        # write(db)
-        read(db)
+        write(db)
         scores["writes"]["default_inserts"].append(perf() - start)
+        start = perf()
+        read(db)
+        scores["reads"]["default_inserts"].append(perf() - start)
+
     sleep(0.1)
     if db_file.exists():
         os.remove(db_file)
 
-for test in scores['writes']:
-    for score in scores['writes'][test]:
-        print(score)
+# for test in scores['writes']:
+#     for score in scores['writes'][test]:
+#         print(score)
+
+print(tabulate.tabulate(scores["reads"],headers="keys"))
+print(tabulate.tabulate(scores["writes"],headers="keys"))

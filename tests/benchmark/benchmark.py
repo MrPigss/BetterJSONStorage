@@ -38,7 +38,7 @@ def read(db: TinyDB):
 
 
 # load citm.json
-with open("benchmark/citm_catalog.json", "rb") as f:
+with open("tests/data/citm_catalog.json", "rb") as f:
     data = loads(f.read())
 
 # transform the data so it fits the 'document store' model better (no data has been deleted, only transformed)
@@ -82,30 +82,30 @@ for topic in transforms["topicNames"]:
 
 def better():
     with TinyDB(
-        Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage
+        Path("tests/benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage
     ) as db:
         db.insert({"a": "b"})
     pass
 
 
 def default():
-    with TinyDB("benchmark/db/test_citm2.db") as db:
+    with TinyDB("tests/benchmark/db/test_citm2.db") as db:
         db.insert({"a": "b"})
     pass
 
 
 with TinyDB(
-    Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage
+    Path("tests/benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage
 ) as db:
-    cProfile.run("write(db)", "benchmark/prof/better_write.prof")
-    cProfile.run("read(db)", "benchmark/prof/better_read.prof")
+    cProfile.run("write(db)", "tests/benchmark/prof/better_write.prof")
+    cProfile.run("read(db)", "tests/benchmark/prof/better_read.prof")
 
-with TinyDB("benchmark/db/test_citm2.db") as db:
-    cProfile.run("write(db)", "benchmark/prof/default_write.prof")
-    cProfile.run("read(db)", "benchmark/prof/default_read.prof")
+with TinyDB("tests/benchmark/db/test_citm2.db") as db:
+    cProfile.run("write(db)", "tests/benchmark/prof/default_write.prof")
+    cProfile.run("read(db)", "tests/benchmark/prof/default_read.prof")
 
-cProfile.run("default()", "benchmark/prof/default_init.prof")
-cProfile.run("better()", "benchmark/prof/better_init.prof")
+cProfile.run("default()", "tests/benchmark/prof/default_init.prof")
+cProfile.run("better()", "tests/benchmark/prof/better_init.prof")
 
 
 import os
@@ -113,5 +113,5 @@ import os
 for test in {"init", "read", "write"}:
     for x in {"default", "better"}:
         os.system(
-            f"gprof2dot -n0 -e0 -f pstats ./benchmark/prof/{x}_{test}.prof | dot -Tpng -o ./benchmark/callgraphs/{x}_{test}.png"
+            f"gprof2dot -n0 -e0 -f pstats tests/benchmark/prof/{x}_{test}.prof | dot -Tpng -o tests/benchmark/callgraphs/{x}_{test}.png"
         )
