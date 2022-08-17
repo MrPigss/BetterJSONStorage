@@ -152,6 +152,7 @@ class BetterJSONStorage:
 
             if self._changed:
                 self._changed = False
+                self._handle.seek(0)
                 self._handle.write(compress(dumps(self._data)))
 
         self._shutdown_lock.release()
