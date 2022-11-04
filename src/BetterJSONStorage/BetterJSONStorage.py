@@ -126,7 +126,9 @@ class BetterJSONStorage:
 
         # finishing init
         self.load()
-        Thread.start_new_thread(self.__file_writer, ())
+        # only start the file write at all if the access mode is not read only
+        if access_mode == "r+":
+            Thread.start_new_thread(self.__file_writer, ())
 
     def __new__(class_, path, *args, **kwargs):
         h = hash(path)
