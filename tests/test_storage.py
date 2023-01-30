@@ -95,7 +95,7 @@ class Test_access_modes:
 
 class Test_multiple_instances:
     def test_different_paths(self, db_file):
-        p = Path(str(db_file) + "test.db")
+        p = Path(f"{str(db_file)}test.db")
         x = BetterJSONStorage(db_file, access_mode="r+").close()
         y = BetterJSONStorage(p, access_mode="r+").close()
 
@@ -108,7 +108,7 @@ class Test_multiple_instances:
 class Test_reads:
     def test_reading_empty_file(self, empty_db_file):
         db = TinyDB(empty_db_file, Storage=BetterJSONStorage)
-        assert db.get(123) == None
+        assert db.get(123) is None
         assert db.contains(doc_id=123) == False
         assert db.tables() == set()
         assert db.all() == []
@@ -140,7 +140,7 @@ class Test_writes:
             insert = db.insert({})
             assert db.get(doc_id=insert) == {}
             db.remove(doc_ids=[insert])
-            assert db.get(doc_id=insert) == None
+            assert db.get(doc_id=insert) is None
             sleep(0.1)
 
 

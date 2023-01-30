@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "BetterJSONStorage"
+dynamic = ["version"]
+description = "An optimized tinyDB storage extension"
+readme = "README.rst"
+license = ""
+requires-python = ">=3.8"
+authors = [
+    { name = "Thomas Eeckhout", email = "Thomas.Eeckhout@outlook.be" },
+]
+classifiers = [
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Database",
+]
+dependencies = [
+    "blosc2",
+    "mypy",
+    "orjson",
+    "tinydb",
+]
+
+[project.urls]
+Homepage = "https://github.com/MrPigss/BetterJSONStorage"
+
+[tool.hatch.version]
+path = "src/BetterJSONStorage/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "src/BetterJSONStorage",
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+]

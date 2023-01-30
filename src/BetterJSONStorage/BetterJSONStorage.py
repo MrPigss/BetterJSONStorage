@@ -28,6 +28,7 @@ from typing import Literal, Mapping, Optional, Set, Union
 from blosc2 import compress, decompress
 from orjson import dumps, loads
 
+
 class BetterJSONStorage:
     """
     A class that represents a storage interface for reading and writing to a file.
@@ -74,7 +75,7 @@ class BetterJSONStorage:
         "_changed",
         "_running",
         "_shutdown_lock",
-        "_handle"
+        "_handle",
     )
 
     _paths: Set[int] = set()
@@ -91,9 +92,11 @@ class BetterJSONStorage:
         self._hash = hash(path)
 
         self._handle: Optional[Union[BufferedWriter, BufferedRandom]] = None
-        if not access_mode in {"r", "r+"}:
+        if access_mode not in {"r", "r+"}:
             self.close()
-            raise AttributeError(f'access_mode is not one of ("r", "r+"), :{access_mode}')
+            raise AttributeError(
+                f'access_mode is not one of ("r", "r+"), :{access_mode}'
+            )
 
         if not isinstance(path, Path):
             self.close()
@@ -108,14 +111,14 @@ class BetterJSONStorage:
                         """
                 )
             path.parent.mkdir(parents=True, exist_ok=True)
-            self._handle = path.open('wb+')
+            self._handle = path.open("wb+")
         if not path.is_file():
             self.close()
             raise FileNotFoundError(
                 f"""path does not lead to a file: <{path.absolute()}>."""
             )
         else:
-            self._handle = path.open('rb+')
+            self._handle = path.open("rb+")
 
         self._access_mode = access_mode
         self._path = path
@@ -130,15 +133,14 @@ class BetterJSONStorage:
         if access_mode == "r+":
             Thread.start_new_thread(self.__file_writer, ())
 
-    def __new__(class_, path, *args, **kwargs):
+    def __new__(cls, path, *args, **kwargs):
         h = hash(path)
-        if h in class_._paths:
+        if h in cls._paths:
             raise AttributeError(
                 f'A BetterJSONStorage object already exists with path < "{path}" >'
             )
-        class_._paths.add(h)
-        instance = object.__new__(class_)
-        return instance
+        cls._paths.add(h)
+        return object.__new__(cls)
 
     def __repr__(self):
         return (
@@ -160,7 +162,7 @@ class BetterJSONStorage:
         self._shutdown_lock.release()
 
     def write(self, data: Mapping):
-        if not self._access_mode == "r+":
+        if self._access_mode != "r+":
             raise PermissionError("Storage is openend as read only")
         self._data = data
         self._changed = True
