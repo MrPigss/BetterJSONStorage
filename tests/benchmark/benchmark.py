@@ -43,7 +43,7 @@ with open("tests/data/citm_catalog.json", "rb") as f:
 
 # transform the data so it fits the 'document store' model better (no data has been deleted, only transformed)
 transforms = {
-    "events": [item for item in data["events"].values()],
+    "events": list(data["events"].values()),
     "seatCategoryNames": [
         {
             "category": name,
@@ -53,31 +53,34 @@ transforms = {
                 if data["seatCategoryNames"][id] == name
             ],
         }
-        for name in (v for v in data["seatCategoryNames"].values())
+        for name in iter(data["seatCategoryNames"].values())
     ],
     "areaNames": [{"id": k, "name": v} for k, v in data["areaNames"].items()],
     "audienceSubCategoryNames": [
-        {"id": k, "name": v} for k, v in data["audienceSubCategoryNames"].items()
+        {"id": k, "name": v}
+        for k, v in data["audienceSubCategoryNames"].items()
     ],
-    "subTopicNames": [{"id": k, "name": v} for k, v in data["subTopicNames"].items()],
-    "topicNames": [{"id": k, "name": v} for k, v in data["topicNames"].items()],
+    "subTopicNames": [
+        {"id": k, "name": v} for k, v in data["subTopicNames"].items()
+    ],
+    "topicNames": [
+        {"id": k, "name": v} for k, v in data["topicNames"].items()
+    ],
     "performances": data["performances"],
 }
 
-# group topics and subtopics together, no need to be in seperate tables
-topics = []
-for topic in transforms["topicNames"]:
-    topics.append(
-        {
-            "id": topic["id"],
-            "name": topic["name"],
-            "subtopic": [
-                subtopic
-                for subtopic in transforms["subTopicNames"]
-                if int(subtopic["id"]) in data["topicSubTopics"][topic["id"]]
-            ],
-        }
-    )
+topics = [
+    {
+        "id": topic["id"],
+        "name": topic["name"],
+        "subtopic": [
+            subtopic
+            for subtopic in transforms["subTopicNames"]
+            if int(subtopic["id"]) in data["topicSubTopics"][topic["id"]]
+        ],
+    }
+    for topic in transforms["topicNames"]
+]
 
 
 def better():
@@ -85,13 +88,11 @@ def better():
         Path("tests/benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage
     ) as db:
         db.insert({"a": "b"})
-    pass
 
 
 def default():
     with TinyDB("tests/benchmark/db/test_citm2.db") as db:
         db.insert({"a": "b"})
-    pass
 
 
 with TinyDB(

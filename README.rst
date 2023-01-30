@@ -73,6 +73,12 @@ For all options see the `orjson documentation <https://github.com/ijl/orjson#opt
 
 performance
 ************
+
+See new performance numbers on the bottom.
+The entire test suite will be redone to be up to date but until that happens both the old (as they are more complete) 
+as the new (as they are more comparable to modern hardware) will be kept in the readme. 
+
+
 The benchmarks are done on fixtures of real data:
 
 * citm_catalog.json, 1.7MiB, concert data, containing nested dictionaries of strings and arrays of integers, indented.
@@ -201,3 +207,32 @@ This is the same data that has een used above poured into a nice excel graph.
     :scale: 100%
     :width: 60%
 
+New Performance Numbers
+=======================
+
+New tests were run on a 2021 MacBook Pro running Ventura 13.0.1 and python 3.10.9 .
+
+Both reading and writing test are the same for both Better as default JSONStorage.
+
+
+.. code-block:: bash
+
+    BetterJSONStorage:
+        writing took: 71.001375ms
+        reading took: 29.283583ms
+    Default JSONStorage:
+        writing took: 7825.321125ms
+        reading took: 19438.65975ms
+
+    Total: 
+        BetterJsonStorage: 240.7505ms
+        default jsonStorage: 27264.555167ms
+
+    relative time vs BetterJSONStorage: 
+        BetterJSONStorage: 1x
+        JSONStorage: 113.25x
+
+The Benchmark shows that the default JSONStorage takes 113 times as long to finish as the BetterJSONStorage.
+Filesizes are also way bigger with 8.5MB for the default JSONStorage and only 373 KB for BetterJSONStorage.
+
+To test the performance for yourself, run the tests/benchmark/citm.py file.

@@ -1,51 +1,16 @@
 from pathlib import Path
 from time import perf_counter_ns
-
 import orjson
 from tinydb import Query, TinyDB
 
 from BetterJSONStorage import BetterJSONStorage
 
-
-def write(db: TinyDB):
-    start_write = perf_counter_ns()
-    db.drop_tables()
-    for _ in range(15):
-        for table in data:
-            if table not in ("topicNames", "subTopicNames", "topicSubTopics"):
-                db.table(table).insert_multiple(transforms[table])
-        db.table("topics").insert_multiple(topics)
-    print(f"\t{perf_counter_ns()-start_write}ns writing")
-
-
-def read(db: TinyDB):
-    start_read = perf_counter_ns()
-    topic = Query()
-    subtopic = Query()
-    for _ in range(15):
-        table = db.table("topics")
-        for sub in (
-            337184268,
-            337184288,
-            337184284,
-            337184263,
-            337184298,
-            337184269,
-            337184280,
-            337184297,
-            337184281,
-            337184296,
-            337184279,
-        ):
-            table.get(topic.subtopic.any(subtopic.id == sub))
-    print(f"\t{perf_counter_ns()-start_read}ns reading")
-
-
 # load citm.json
-with open("benchmark/citm_catalog.json", "rb") as f:
+with open("tests/data/citm_catalog.json", "rb") as f:
     data = orjson.loads(f.read())
 
-# transform the data so it fits the 'document store' model better (no data has been deleted, only transformed)
+# transform the data so it fits the 'document store' model better (same data - different format).
+# this makes them easier to query, reason about, store, ...
 transforms = {
     "events": [item for item in data["events"].values()],
     "seatCategoryNames": [
@@ -69,34 +34,95 @@ transforms = {
 }
 
 # group topics and subtopics together, no need to be in seperate tables
-topics = []
-for topic in transforms["topicNames"]:
-    topics.append(
-        {
-            "id": topic["id"],
-            "name": topic["name"],
-            "subtopic": [
-                subtopic
-                for subtopic in transforms["subTopicNames"]
-                if int(subtopic["id"]) in data["topicSubTopics"][topic["id"]]
-            ],
-        }
-    )
+topics = [
+    {
+        "id": topic["id"],
+        "name": topic["name"],
+        "subtopic": [
+            subtopic for subtopic in transforms["subTopicNames"]
+            if int(subtopic["id"]) in data["topicSubTopics"][topic["id"]]
+        ],
+    } for topic in transforms["topicNames"]
+]
 
+
+def write(db: TinyDB):
+    start_w = perf_counter_ns()
+    # start from clean empty table
+    db.drop_tables()
+
+    # do it multiple times just to be shure
+    for _ in range(15):
+
+        # loop over root nodes of the citm_catalog.json
+        # these should be:
+        # areaNames, audienceSubCategoryNames, events, performances, 
+        # seatCategoryNames, subTopicNames, topicNames, topicSubTopics
+        for table in data:
+
+            # ignore these nodes -> these will be added seperatly
+            if table not in ("topicNames", "subTopicNames", "topicSubTopics"):
+
+                # add the transformed data to the table
+                db.table(table).insert_multiple(transforms[table])
+
+        # now add all the topics and subtopics
+        db.table("topics").insert_multiple(topics)
+    print(f"\twriting took: {(perf_counter_ns()-start_w)/1_000_000}ms")
+
+
+def read(db: TinyDB):
+    start_r = perf_counter_ns()
+    topic = Query()
+    subtopic = Query()
+    for _ in range(15):
+
+        # select the topics table
+        table = db.table("topics")
+        # loop over the subtopic id's 
+        for sub in (
+            337184268,
+            337184288,
+            337184284,
+            337184263,
+            337184298,
+            337184269,
+            337184280,
+            337184297,
+            337184281,
+            337184296,
+            337184279,
+        ):
+            # return the document with the matching id
+            table.get(topic.subtopic.any(subtopic.id == sub))
+    print(f"\treading took: {(perf_counter_ns()-start_r)/1_000_000}ms")
+
+# #################### #
+#   Actual benchmark   #  
+# #################### # 
 start = perf_counter_ns()
-with TinyDB(
-    Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage
-) as db:
+with TinyDB(Path("benchmark/db/test_citm.db"), access_mode="r+", storage=BetterJSONStorage) as db:
+    print("BetterJSONStorage:")
     write(db)
     read(db)
-end_threaded = perf_counter_ns() - start
+end_betterjson = perf_counter_ns() - start
 
 start = perf_counter_ns()
-with TinyDB("benchmark/db/test_citm2.db") as db:
+with TinyDB("tests/benchmark/db/test_citm2.db") as db:
+    print("Default JSONStorage:")
     write(db)
     read(db)
 end_default = perf_counter_ns() - start
 
+# print out the time it took + the time compared to BetterJSONStorage
 print(
-    f"Total: \n\tBetterJsonStorage: {end_threaded/1000000}ms\n\tdefault jsonStorage: {end_default/1000000}ms\ndifference: \n\tbjs: {end_threaded/end_threaded:.2}x\n\tdjs: {end_default/end_threaded:.3}x"
+f"""
+Total: 
+    BetterJsonStorage: {end_betterjson / 1_000_000}ms
+    default jsonStorage: {end_default / 1_000_000}ms
+
+relative time vs BetterJSONStorage: 
+    BetterJSONStorage: 1x
+    JSONStorage: {end_default / end_betterjson:.5}x
+"""
 )
