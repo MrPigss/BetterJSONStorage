@@ -1,0 +1,14 @@
+name: Codecov testcoverage
+on: push
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: actions-pytest
+        uses: xoviat/actions-pytest@0.1-alpha2
+        with:
+          args: tests/test_storage.py
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: coverage.xml
