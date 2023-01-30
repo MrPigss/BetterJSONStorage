@@ -4,5 +4,7 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
