@@ -8,3 +8,5 @@ jobs:
         uses: actions/checkout@v2
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOVTOKEN }}
