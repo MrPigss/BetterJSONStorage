@@ -27,6 +27,8 @@ A goal for the BetterJSONStorage project is to provide a drop in replacement for
 An example of how to implement BetterJSONStorage can be found below.
 Anything else can be found in the `TinyDB docs <https://tinydb.readthedocs.io/>`_.
 
+***Database or JSON files created using other storage types (even the default one) are incompatible.***
+
 Installing BetterJSONStorage
 ****************************
 
