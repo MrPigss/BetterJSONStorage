@@ -72,6 +72,7 @@ class BetterJSONStorage:
         "_path",
         "_data",
         "_kwargs",
+        "_dump_kwargs",
         "_changed",
         "_running",
         "_shutdown_lock",
