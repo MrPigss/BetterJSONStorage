@@ -7,22 +7,15 @@ name = "BetterJSONStorage"
 dynamic = ["version"]
 description = "An optimized tinyDB storage extension"
 readme = "README.rst"
-license = ""
+license = { text = "MIT License" }
 requires-python = ">=3.8"
-authors = [
-    { name = "Thomas Eeckhout", email = "Thomas.Eeckhout@outlook.be" },
-]
+authors = [{ name = "Thomas Eeckhout", email = "Thomas.Eeckhout@outlook.be" }]
 classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Topic :: Database",
 ]
-dependencies = [
-    "blosc2",
-    "mypy",
-    "orjson",
-    "tinydb",
-]
+dependencies = ["blosc2", "mypy", "orjson", "tinydb"]
 
 [project.urls]
 Homepage = "https://github.com/MrPigss/BetterJSONStorage"
@@ -31,11 +24,7 @@ Homepage = "https://github.com/MrPigss/BetterJSONStorage"
 path = "src/BetterJSONStorage/__init__.py"
 
 [tool.hatch.build.targets.wheel]
-packages = [
-    "src/BetterJSONStorage",
-]
+packages = ["src/BetterJSONStorage"]
 
 [tool.hatch.build.targets.sdist]
-include = [
-    "/src",
-]
+include = ["/src"]

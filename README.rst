@@ -1,6 +1,4 @@
 .. image:: https://raw.githubusercontent.com/MrPigss/BetterJSONStorage/master/img/logo.png
-    :scale: 100%
-    :height: 150px
 
 Introduction
 ************
@@ -77,8 +75,8 @@ performance
 ************
 
 See new performance numbers on the bottom.
-The entire test suite will be redone to be up to date but until that happens both the old (as they are more complete) 
-as the new (as they are more comparable to modern hardware) will be kept in the readme. 
+The entire test suite will be redone to be up to date but until that happens both the old (as they are more complete)
+as the new (as they are more comparable to modern hardware) will be kept in the readme.
 
 
 The benchmarks are done on fixtures of real data:
@@ -206,7 +204,6 @@ Graph
 This is the same data that has een used above poured into a nice excel graph.
 
 .. image:: ./img/diff.png
-    :scale: 100%
     :width: 60%
 
 New Performance Numbers
@@ -226,11 +223,11 @@ Both reading and writing test are the same for both Better as default JSONStorag
         writing took: 7825.321125ms
         reading took: 19438.65975ms
 
-    Total: 
+    Total:
         BetterJsonStorage: 240.7505ms
         default jsonStorage: 27264.555167ms
 
-    relative time vs BetterJSONStorage: 
+    relative time vs BetterJSONStorage:
         BetterJSONStorage: 1x
         JSONStorage: 113.25x
 

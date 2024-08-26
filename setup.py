@@ -1,16 +1,11 @@
 import setuptools
 
-with open("README.rst", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
-
 setuptools.setup(
     name="BetterJSONStorage",
-    version="1.2.6",
+    version="1.3.2",
     author="Thomas Eeckhout",
     author_email="Thomas.Eeckhout@outlook.be",
     description="An optimized tinyDB storage extension",
-    long_description=long_description,
-    long_description_content_type="text/x-rst",
     url="https://github.com/MrPigss/BetterJSONStorage",
     classifiers=[
         "Programming Language :: Python :: 3",
