@@ -72,6 +72,7 @@ class BetterJSONStorage:
         "_path",
         "_data",
         "_kwargs",
+        "_dump_kwargs",
         "_changed",
         "_running",
         "_shutdown_lock",
@@ -125,6 +126,7 @@ class BetterJSONStorage:
 
         # rest
         self._kwargs = kwargs
+        self._dump_kwargs = {k: v for k, v in kwargs.items() if k in {'default', 'option'}}
         self._data: Optional[Mapping]
 
         # finishing init
@@ -157,7 +159,7 @@ class BetterJSONStorage:
             if self._changed:
                 self._changed = False
                 self._handle.seek(0)
-                self._handle.write(compress(dumps(self._data)))
+                self._handle.write(compress(dumps(self._data, **self._dump_kwargs)))
 
         self._shutdown_lock.release()
 
